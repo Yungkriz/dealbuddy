@@ -4,6 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="DealBuddy helps you find the best deals on electronics, fashion, home essentials and more. Save money with verified deals from Amazon, Best Buy and other trusted retailers.">
   <title>DealBuddy — Find the Best Deals</title>
 </head>
 
@@ -24,17 +26,13 @@
 
     <section id="hero">
       <h1>Find the Best Deals Near You</h1>
-
       <p>
         Save money on electronics, fashion, home essentials,
         AI tools, groceries and more.
       </p>
-
       <form action="/search" method="GET">
         <label for="search">What are you looking for?</label>
-
         <input type="search" id="search" name="q" placeholder="e.g. AirPods Pro, Samsung TV, Laptop..." required>
-
         <button type="submit">Search Deals</button>
       </form>
     </section>
@@ -42,21 +40,18 @@
     <!-- Featured Deals -->
     <section id="deals">
       <h2>Featured Deals</h2>
-      <div class="deals-grid"></div>
 
-      <!-- your deal articles here -->
       <article>
         <img src="https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=200&fit=crop"
-          alt="Apple AirPods Pro">
-
+          alt="Apple AirPods Pro" loading="lazy">
         <h3>Apple AirPods Pro 3 — $180</h3>
         <p>Was $249. Save $69 at Amazon.</p>
         <a href="#">View Deal →</a>
       </article>
 
       <article>
-        <img src="https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=300&h=200&fit=crop" alt="MacBook Air">
-
+        <img src="https://images.unsplash.com/photo-1517336714739-489689fd1ca8?w=300&h=200&fit=crop" alt="MacBook Air"
+          loading="lazy">
         <h3>MacBook Air M5 — $949</h3>
         <p>Was $1,099. Save $150 at Amazon.</p>
         <a href="#">View Deal →</a>
@@ -64,8 +59,7 @@
 
       <article>
         <img src="https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=200&fit=crop"
-          alt="Logitech Mouse">
-
+          alt="Logitech Mouse" loading="lazy">
         <h3>Logitech MX Master 3S Mouse — $89.99</h3>
         <p>Was $119.99. Save $30 at Amazon.</p>
         <a href="#">View Deal →</a>
@@ -73,8 +67,7 @@
 
       <article>
         <img src="https://images.unsplash.com/photo-1593784991095-a205069470b6?w=300&h=200&fit=crop"
-          alt="Samsung Crystal UHD TV">
-
+          alt="Samsung Crystal UHD TV" loading="lazy">
         <h3>Samsung 65" Crystal UHD 4K TV — $329.99</h3>
         <p>Was $469.99. Save $140 at Best Buy.</p>
         <a href="#">View Deal →</a>
@@ -82,8 +75,7 @@
 
       <article>
         <img src="https://images.unsplash.com/photo-1461151304267-38535e780c79?w=300&h=200&fit=crop"
-          alt="Samsung The Frame TV">
-
+          alt="Samsung The Frame TV" loading="lazy">
         <h3>Samsung The Frame 65" TV — $1,199.99</h3>
         <p>Was $1,599.99. Save $400 at Best Buy.</p>
         <a href="#">View Deal →</a>
@@ -91,8 +83,7 @@
 
       <article>
         <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&h=200&fit=crop"
-          alt="Samsung QLED TV">
-
+          alt="Samsung QLED TV" loading="lazy">
         <h3>Samsung 65" QLED 4K Smart TV — $599.99</h3>
         <p>Was $899.99. Save $300 at Best Buy.</p>
         <a href="#">View Deal →</a>
@@ -102,79 +93,51 @@
 
     <!-- How It Works -->
     <section id="how-it-works">
-
       <h2>How It Works</h2>
 
       <article>
         <h3>🔍 Step 1: Search Deals</h3>
-        <p>
-          Search for products or browse categories to discover
-          the latest discounts.
-        </p>
+        <p>Search for products or browse categories to discover the latest discounts.</p>
       </article>
 
       <article>
         <h3>💰 Step 2: Compare Savings</h3>
-        <p>
-          Review prices and compare offers from trusted retailers
-          such as Amazon and Best Buy.
-        </p>
+        <p>Review prices and compare offers from trusted retailers such as Amazon and Best Buy.</p>
       </article>
 
       <article>
         <h3>🛒 Step 3: Grab the Deal</h3>
-        <p>
-          Click through to the retailer and purchase before
-          the offer expires.
-        </p>
+        <p>Click through to the retailer and purchase before the offer expires.</p>
       </article>
-
     </section>
 
     <!-- Categories -->
     <section id="categories">
-
       <h2>Browse by Category</h2>
-
       <ul>
         <li><a href="#">📱 Electronics</a></li>
         <li><a href="#">👗 Fashion</a></li>
         <li><a href="#">🏠 Home & Living</a></li>
         <li><a href="#">🍎 Groceries</a></li>
-        <li><a href="#">⚽ Sports</a></li>
+        <li><a href="#">⚽️ Sports</a></li>
         <li><a href="#">💻 Computers & Tech</a></li>
         <li><a href="#">🤖 AI & Software</a></li>
       </ul>
-
     </section>
 
   </main>
 
   <!-- Footer -->
   <footer>
-
     <section id="newsletter">
-
       <h2>Subscribe for Weekly Deals</h2>
-
       <form action="/subscribe" method="POST">
-
-        <label for="email">
-          Email Address:
-        </label>
-
+        <label for="email">Email Address:</label>
         <input type="email" id="email" name="email" placeholder="Enter your email address" required>
-
-        <button type="submit">
-          Subscribe
-        </button>
-
+        <button type="submit">Subscribe</button>
       </form>
-
     </section>
-
     <p>© 2026 Owolabi Onaope Christopher. All rights reserved.</p>
-
   </footer>
 
 </body>
