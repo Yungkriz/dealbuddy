@@ -1,4 +1,4 @@
-/* ===== DealBuddy Styles — Final Polished Version ===== */
+/* ===== DealBuddy Styles — Day 6: Advanced Grid Layouts ===== */
 
 /* Reset & Base */
 * {
@@ -48,16 +48,6 @@ img {
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -69,7 +59,18 @@ img {
   }
 }
 
-/* ===== Header ===== */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Header */
 header {
   background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
   padding: 1rem 2rem;
@@ -92,7 +93,6 @@ header nav a {
   color: #e2e8f0;
   font-weight: 500;
   transition: color 0.2s ease, transform 0.2s ease;
-  position: relative;
 }
 
 header nav a:hover {
@@ -109,12 +109,12 @@ header nav a:first-child {
   background-clip: text;
 }
 
-header nav a:first-child:hover {
-  transform: scale(1.05);
-}
-
-/* ===== Hero Section ===== */
+/* ===== Hero Section — Using Grid ===== */
 #hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto auto;
+  place-items: center;
   text-align: center;
   padding: 5rem 2rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
@@ -123,6 +123,7 @@ header nav a:first-child:hover {
   color: #fff;
   position: relative;
   overflow: hidden;
+  min-height: 400px;
 }
 
 #hero::before {
@@ -134,17 +135,6 @@ header nav a:first-child:hover {
   height: 200%;
   background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
   animation: rotate 20s linear infinite;
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 #hero h1 {
@@ -159,16 +149,18 @@ header nav a:first-child:hover {
   font-size: 1rem;
   margin-bottom: 2rem;
   opacity: 0.9;
+  max-width: 500px;
   animation: fadeInUp 0.8s ease 0.2s both;
   position: relative;
   z-index: 1;
 }
 
 #hero form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
   max-width: 500px;
+  width: 100%;
   margin: 0 auto;
   animation: fadeInUp 0.8s ease 0.4s both;
   position: relative;
@@ -178,6 +170,7 @@ header nav a:first-child:hover {
 #hero label {
   font-size: 0.9rem;
   opacity: 0.85;
+  text-align: left;
 }
 
 #hero input {
@@ -220,11 +213,7 @@ header nav a:first-child:hover {
   box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
 }
 
-#hero button:active {
-  transform: translateY(0);
-}
-
-/* ===== Featured Deals ===== */
+/* ===== Featured Deals — Using Grid ===== */
 #deals {
   padding: 4rem 2rem;
   max-width: 1200px;
@@ -235,12 +224,12 @@ header nav a:first-child:hover {
   font-size: 1.75rem;
   margin-bottom: 2rem;
   text-align: center;
-  animation: fadeInUp 0.6s ease;
 }
 
+/* Grid: auto-fit with minmax for responsive cards */
 #deals {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
 }
 
@@ -251,6 +240,8 @@ header nav a:first-child:hover {
   box-shadow: 0 4px 15px rgba(0,0,0,0.06);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   animation: fadeInUp 0.6s ease both;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
 }
 
 #deals article:nth-child(1) { animation-delay: 0.1s; }
@@ -301,7 +292,23 @@ header nav a:first-child:hover {
   padding-left: 1.5rem;
 }
 
-/* ===== How It Works ===== */
+/* ===== Featured Banner — Grid with Named Areas ===== */
+#deals::before {
+  content: '🔥 Hot Deals This Week';
+  display: block;
+  grid-column: 1 / -1;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid #f59e0b;
+}
+
+/* ===== How It Works — Grid Template Areas ===== */
 #how-it-works {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   padding: 4rem 2rem;
@@ -313,13 +320,53 @@ header nav a:first-child:hover {
   margin-bottom: 2rem;
 }
 
+#how-it-works {
+  display: grid;
+  grid-template-areas:
+    "title"
+    "step1"
+    "step2"
+    "step3";
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+#how-it-works h2 {
+  grid-area: title;
+}
+
+#how-it-works article:nth-child(2) { grid-area: step1; }
+#how-it-works article:nth-child(3) { grid-area: step2; }
+#how-it-works article:nth-child(4) { grid-area: step3; }
+
 #how-it-works article {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
+  padding: 2rem;
   background: #fff;
-  border-radius: 12px;
+  border-radius: 16px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.04);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0.5rem 1.25rem;
+  text-align: left;
+  align-items: start;
+}
+
+#how-it-works article h3 {
+  font-size: 1.15rem;
+  color: #1e293b;
+  grid-column: 2;
+}
+
+#how-it-works article p {
+  color: #64748b;
+  grid-column: 2;
+}
+
+#how-it-works article h3::first-letter {
+  font-size: 1.5rem;
 }
 
 #how-it-works article:hover {
@@ -327,17 +374,7 @@ header nav a:first-child:hover {
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-#how-it-works h3 {
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
-  color: #1e293b;
-}
-
-#how-it-works p {
-  color: #64748b;
-}
-
-/* ===== Categories ===== */
+/* ===== Categories — Grid with auto-fill ===== */
 #categories {
   padding: 4rem 2rem;
   max-width: 1200px;
@@ -352,44 +389,51 @@ header nav a:first-child:hover {
 
 #categories ul {
   list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 0.75rem;
 }
 
 #categories li a {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.25rem;
   background: #fff;
   border: 2px solid #e2e8f0;
-  border-radius: 50px;
+  border-radius: 12px;
   font-weight: 600;
   color: #475569;
   font-size: 0.9rem;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  text-align: center;
+  min-height: 60px;
 }
 
 #categories li a:hover {
   border-color: #667eea;
   color: #667eea;
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
   text-decoration: none;
 }
 
-/* ===== Footer ===== */
+/* ===== Footer — Grid Layout ===== */
 footer {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #fff;
   padding: 4rem 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
   text-align: center;
 }
 
 #newsletter {
   max-width: 500px;
-  margin: 0 auto 2rem;
+  margin: 0 auto;
+  width: 100%;
 }
 
 #newsletter h2 {
@@ -404,8 +448,8 @@ footer {
 }
 
 #newsletter form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
 }
 
@@ -448,10 +492,10 @@ footer {
   box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
 }
 
-footer p {
+footer > p {
   opacity: 0.6;
   font-size: 0.875rem;
-  margin-top: 2rem;
+  grid-column: 1 / -1;
 }
 
 /* ===== Scroll to Top Button ===== */
@@ -485,6 +529,11 @@ footer p {
 
 /* ===== Tablet (768px+) ===== */
 @media (min-width: 768px) {
+  #hero {
+    min-height: 450px;
+    padding: 6rem 2rem;
+  }
+
   #hero h1 {
     font-size: 2.75rem;
   }
@@ -494,12 +543,11 @@ footer p {
   }
 
   #hero form {
-    flex-direction: row;
+    grid-template-columns: 1fr auto;
     max-width: 600px;
   }
 
   #hero input {
-    flex: 1;
     width: auto;
   }
 
@@ -507,17 +555,19 @@ footer p {
     width: auto;
   }
 
-  #deals {
-    grid-template-columns: repeat(2, 1fr);
+  #how-it-works {
+    grid-template-areas:
+      "title title title"
+      "step1 step2 step3";
+    grid-template-columns: repeat(3, 1fr);
   }
 
   #newsletter form {
-    flex-direction: row;
+    grid-template-columns: 1fr auto;
     max-width: 600px;
   }
 
   #newsletter input {
-    flex: 1;
     width: auto;
   }
 
@@ -529,7 +579,8 @@ footer p {
 /* ===== Desktop (1024px+) ===== */
 @media (min-width: 1024px) {
   #hero {
-    padding: 6rem 2rem;
+    min-height: 500px;
+    padding: 7rem 2rem;
   }
 
   #hero h1 {
@@ -542,32 +593,25 @@ footer p {
 
   #deals {
     grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-  }
-
-  #how-it-works {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-
-  #how-it-works h2 {
-    grid-column: 1 / -1;
-  }
-
-  #how-it-works article {
-    margin-bottom: 0;
   }
 
   #categories ul {
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 
   #categories li a {
-    padding: 0.875rem 1.75rem;
+    padding: 1.125rem 1.5rem;
     font-size: 1rem;
+  }
+
+  footer {
+    grid-template-columns: 1fr 1fr;
+    text-align: left;
+  }
+
+  #newsletter {
+    grid-column: 1 / -1;
+    text-align: center;
   }
 }
 
