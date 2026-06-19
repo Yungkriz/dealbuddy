@@ -91,3 +91,14 @@ if (newsletterForm) {
 }
 
 console.log('DealBuddy is loaded! 🛍️');
+// Scroll to top button
+const scrollTopBtn = document.querySelector('.scroll-top');
+if (scrollTopBtn) {
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+      scrollTopBtn.classList.add('visible');
+    } else {
+      scrollTopBtn.classList.remove('visible');
+    }
+  });
+}
