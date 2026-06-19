@@ -65,12 +65,12 @@ header nav a:first-child {
 }
 
 #hero h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 1rem;
 }
 
 #hero p {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin-bottom: 2rem;
   opacity: 0.9;
 }
@@ -83,11 +83,17 @@ header nav a:first-child {
   margin: 0 auto;
 }
 
+#hero label {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
 #hero input {
   padding: 0.875rem 1.25rem;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
+  width: 100%;
 }
 
 #hero button {
@@ -100,6 +106,7 @@ header nav a:first-child {
   font-weight: 700;
   cursor: pointer;
   transition: background 0.2s;
+  width: 100%;
 }
 
 #hero button:hover {
@@ -119,11 +126,10 @@ header nav a:first-child {
   text-align: center;
 }
 
-#deals > div,
 #deals {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
 }
 
 #deals article {
@@ -167,11 +173,6 @@ header nav a:first-child {
   margin-bottom: 2rem;
 }
 
-#how-it-works {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 #how-it-works article {
   margin-bottom: 1.5rem;
 }
@@ -199,17 +200,18 @@ header nav a:first-child {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 #categories li a {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   background: #fff;
   border: 2px solid #e2e8f0;
   border-radius: 50px;
   font-weight: 500;
   color: #333;
+  font-size: 0.9rem;
   transition: border-color 0.2s, color 0.2s;
 }
 
@@ -242,11 +244,17 @@ footer {
   gap: 0.75rem;
 }
 
+#newsletter label {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
 #newsletter input {
   padding: 0.875rem 1.25rem;
   border: none;
   border-radius: 8px;
   font-size: 1rem;
+  width: 100%;
 }
 
 #newsletter button {
@@ -258,6 +266,7 @@ footer {
   font-size: 1rem;
   font-weight: 700;
   cursor: pointer;
+  width: 100%;
 }
 
 #newsletter button:hover {
@@ -269,21 +278,83 @@ footer p {
   font-size: 0.875rem;
 }
 
-/* Responsive */
+/* ===== Tablet (768px+) ===== */
 @media (min-width: 768px) {
   #hero h1 {
-    font-size: 3rem;
+    font-size: 2.75rem;
   }
-  
-  #newsletter form,
+
+  #hero p {
+    font-size: 1.125rem;
+  }
+
   #hero form {
     flex-direction: row;
     max-width: 600px;
   }
-  
-  #newsletter input,
+
   #hero input {
     flex: 1;
+    width: auto;
+  }
+
+  #hero button {
+    width: auto;
+  }
+
+  #deals {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  #newsletter form {
+    flex-direction: row;
+    max-width: 600px;
+  }
+
+  #newsletter input {
+    flex: 1;
+    width: auto;
+  }
+
+  #newsletter button {
+    width: auto;
   }
 }
 
+/* ===== Desktop (1024px+) ===== */
+@media (min-width: 1024px) {
+  #hero {
+    padding: 5rem 2rem;
+  }
+
+  #hero h1 {
+    font-size: 3rem;
+  }
+
+  #deals {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  #how-it-works {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  #how-it-works h2 {
+    grid-column: 1 / -1;
+  }
+
+  #categories ul {
+    gap: 1rem;
+  }
+
+  #categories li a {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+  }
+}
