@@ -1,4 +1,4 @@
-// ===== DealBuddy App — Day 8: LocalStorage =====
+// ===== DealBuddy App — Day 11: ES6+ Refactored =====
 
 // Deal data
 const dealsData = [
@@ -70,67 +70,95 @@ const dealsData = [
   }
 ];
 
-// ===== LocalStorage Helpers =====
-const STORAGE_KEY = 'dealbuddy_data';
+// ===== LocalStorage Module =====
+const Storage = {
+  KEY: 'dealbuddy_data',
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
+  save(data) {
+    localStorage.setItem(this.KEY, JSON.stringify(data));
+  },
 
-function loadData() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  return raw ? JSON.parse(raw) : { favorites: [], newsletter: '', searchHistory: [] };
-}
+  load() {
+    const raw = localStorage.getItem(this.KEY);
+    return raw ? JSON.parse(raw) : { favorites: [], newsletter: '', searchHistory: [] };
+  },
 
-// ===== User Preferences =====
-function getPrefs() {
-  return loadData();
-}
+  getFavorites() {
+    return this.load().favorites;
+  },
 
-function toggleFavorite(dealId) {
-  const data = getPrefs();
-  const index = data.favorites.indexOf(dealId);
+  toggleFavorite(dealId) {
+    const data = this.load();
+    const index = data.favorites.indexOf(dealId);
 
-  if (index > -1) {
-    data.favorites.splice(index, 1);
-  } else {
-    data.favorites.push(dealId);
+    if (index > -1) {
+      data.favorites.splice(index, 1);
+    } else {
+      data.favorites.push(dealId);
+    }
+
+    this.save(data);
+    return data.favorites.includes(dealId);
+  },
+
+  isFavorite(dealId) {
+    return this.getFavorites().includes(dealId);
+  },
+
+  saveEmail(email) {
+    const data = this.load();
+    data.newsletter = email;
+    this.save(data);
+  },
+
+  getEmail() {
+    return this.load().newsletter || '';
+  },
+
+  saveSearch(term) {
+    if (!term?.trim()) return;
+    const data = this.load();
+    data.searchHistory = [term, ...data.searchHistory.filter(s => s !== term)].slice(0, 5);
+    this.save(data);
   }
-
-  saveData(data);
-  return data.favorites.includes(dealId);
-}
-
-function isFavorite(dealId) {
-  return getPrefs().favorites.includes(dealId);
-}
-
-function saveNewsletter(email) {
-  const data = getPrefs();
-  data.newsletter = email;
-  saveData(data);
-}
-
-function getNewsletter() {
-  return getPrefs().newsletter || '';
-}
-
-function saveSearch(term) {
-  if (!term.trim()) return;
-  const data = getPrefs();
-  // Keep last 5 searches, no duplicates
-  data.searchHistory = [term, ...data.searchHistory.filter(s => s !== term)].slice(0, 5);
-  saveData(data);
-}
+};
 
 // ===== DOM Elements =====
-const searchInput = document.getElementById('search');
-const searchForm = document.querySelector('#hero form');
-const dealsContainer = document.getElementById('deals');
-const categoryLinks = document.querySelectorAll('#categories li a');
+const getElement = (id) => document.getElementById(id);
+const querySelector = (sel) => document.querySelector(sel);
+const querySelectorAll = (sel) => document.querySelectorAll(sel);
 
-// ===== Render Deals with Favorites =====
-function renderDeals(deals) {
+const searchInput = getElement('search');
+const searchForm = querySelector('#hero form');
+const dealsContainer = getElement('deals');
+const categoryLinks = querySelectorAll('#categories li a');
+
+// ===== Render a Single Deal Card =====
+const createDealCard = (deal, index) => {
+  const { id, title, price, originalPrice, savings, retailer, image, badge } = deal;
+  const isFav = Storage.isFavorite(id);
+  const favIcon = isFav ? '❤️' : '🤍';
+  const favText = isFav ? 'Saved' : 'Save';
+
+  const article = document.createElement('article');
+  article.style.animationDelay = `${index * 0.1}s`;
+  article.className = 'deal-card';
+  article.innerHTML = `
+    <div style="position:relative;">
+      <img src="${image}" alt="${title}" loading="lazy">
+      <span style="position:absolute;top:0.5rem;left:0.5rem;background:#fff;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:700;color:#667eea;">${badge}</span>
+      <button onclick="window.toggleFav(${id}, this)" style="position:absolute;top:0.5rem;right:0.5rem;background:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:transform 0.2s;" title="${favText}">${favIcon}</button>
+    </div>
+    <h3>${title}</h3>
+    <p><strong>${price}</strong> <span style="text-decoration:line-through;color:#999;">${originalPrice}</span></p>
+    <p style="color:#16a34a;font-weight:600;">${savings} at ${retailer}</p>
+    <a href="#" onclick="event.preventDefault(); window.openDeal(${id})">View Deal →</a>
+  `;
+  return article;
+};
+
+// ===== Render All Deals =====
+const renderDeals = (deals) => {
   const h2 = dealsContainer.querySelector('h2');
   dealsContainer.innerHTML = '';
   if (h2) dealsContainer.appendChild(h2);
@@ -140,40 +168,27 @@ function renderDeals(deals) {
     return;
   }
 
+  const fragment = document.createDocumentFragment();
   deals.forEach((deal, index) => {
-    const article = document.createElement('article');
-    article.style.animationDelay = `${index * 0.1}s`;
-    article.className = 'deal-card';
-
-    const favIcon = isFavorite(deal.id) ? '❤️' : '🤍';
-    const favText = isFavorite(deal.id) ? 'Saved' : 'Save';
-
-    article.innerHTML = `
-      <div style="position:relative;">
-        <img src="${deal.image}" alt="${deal.title}" loading="lazy">
-        <span style="position:absolute;top:0.5rem;left:0.5rem;background:#fff;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:700;color:#667eea;">${deal.badge}</span>
-        <button onclick="window.toggleFav(${deal.id}, this)" style="position:absolute;top:0.5rem;right:0.5rem;background:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);transition:transform 0.2s;" title="${favText}">${favIcon}</button>
-      </div>
-      <h3>${deal.title}</h3>
-      <p><strong>${deal.price}</strong> <span style="text-decoration:line-through;color:#999;">${deal.originalPrice}</span></p>
-      <p style="color:#16a34a;font-weight:600;">${deal.savings} at ${deal.retailer}</p>
-      <a href="#" onclick="event.preventDefault(); openDeal(${deal.id})">View Deal →</a>
-    `;
-    dealsContainer.appendChild(article);
+    fragment.appendChild(createDealCard(deal, index));
   });
-}
-
-// ===== Toggle Favorite (global for onclick) =====
-window.toggleFav = function(dealId, btn) {
-  const isNowFav = toggleFavorite(dealId);
-  btn.innerHTML = isNowFav ? '❤️' : '🤍';
-  btn.title = isNowFav ? 'Saved' : 'Save';
-  btn.style.transform = 'scale(1.2)';
-  setTimeout(() => btn.style.transform = 'scale(1)', 200);
+  dealsContainer.appendChild(fragment);
 };
 
-// ===== Fetch Deals =====
-async function fetchDeals() {
+// ===== Filter Deals =====
+const filterDeals = (searchTerm) => {
+  const term = searchTerm.toLowerCase().trim();
+
+  const filtered = dealsData.filter(({ title, savings, retailer }) => {
+    const desc = `${savings} ${retailer}`.toLowerCase();
+    return title.toLowerCase().includes(term) || desc.includes(term) || term === '';
+  });
+
+  renderDeals(filtered);
+};
+
+// ===== Fetch Deals (simulated API) =====
+const fetchDeals = async () => {
   dealsContainer.innerHTML = '<p style="text-align:center;padding:3rem;color:#666;">🔄 Loading deals...</p>';
 
   try {
@@ -184,104 +199,111 @@ async function fetchDeals() {
     console.error('Error fetching deals:', error);
     dealsContainer.innerHTML = '<p style="text-align:center;padding:3rem;color:#dc2626;">❌ Error loading deals. Please try again later.</p>';
   }
-}
-
-// ===== Filter Deals =====
-function filterDeals(searchTerm) {
-  const term = searchTerm.toLowerCase().trim();
-
-  const filtered = dealsData.filter(deal => {
-    const title = deal.title.toLowerCase();
-    const desc = `${deal.savings} ${deal.retailer}`.toLowerCase();
-    return title.includes(term) || desc.includes(term) || term === '';
-  });
-
-  renderDeals(filtered);
-}
+};
 
 // ===== Open Deal =====
-function openDeal(id) {
+const openDeal = (id) => {
   const deal = dealsData.find(d => d.id === id);
   if (deal) {
-    alert(`🎉 ${deal.title}\n\n💰 Price: ${deal.price}\n🏪 Retailer: ${deal.retailer}\n${deal.savings}\n\n(Click "OK" to visit ${deal.retailer})`);
+    const { title, price, retailer, savings } = deal;
+    alert(`🎉 ${title}\n\n💰 Price: ${price}\n🏪 Retailer: ${retailer}\n${savings}\n\n(Click "OK" to visit ${retailer})`);
   }
-}
+};
+
+// ===== Toggle Favorite (global for onclick) =====
+window.toggleFav = (dealId, btn) => {
+  const isNowFav = Storage.toggleFavorite(dealId);
+  btn.innerHTML = isNowFav ? '❤️' : '🤍';
+  btn.title = isNowFav ? 'Saved' : 'Save';
+  btn.style.transform = 'scale(1.2)';
+  setTimeout(() => btn.style.transform = 'scale(1)', 200);
+};
+
+// ===== Category Mapping =====
+const categoryMap = {
+  '📱 Electronics': 'electronics',
+  '👗 Fashion': 'fashion',
+  '🏠 Home & Living': 'home',
+  '🍎 Groceries': 'grocery',
+  '⚽️ Sports': 'sports',
+  '💻 Computers & Tech': 'computers',
+  '🤖 AI & Software': 'electronics'
+};
+
+// ===== Smooth Scroll =====
+const smoothScrollTo = (selector) => {
+  const target = querySelector(selector);
+  target?.scrollIntoView({ behavior: 'smooth' });
+};
+
+// ===== Update Favorites Counter =====
+const updateFavCount = () => {
+  const { length } = Storage.getFavorites();
+  const headerNav = querySelector('header nav');
+
+  headerNav.querySelector('.fav-count')?.remove();
+
+  if (length > 0) {
+    const span = document.createElement('span');
+    span.className = 'fav-count';
+    span.style.cssText = 'margin-left:auto;background:#ef4444;color:#fff;padding:0.25rem 0.625rem;border-radius:50px;font-size:0.8rem;font-weight:700;';
+    span.textContent = `❤️ ${length} saved`;
+    headerNav.appendChild(span);
+  }
+};
 
 // ===== Event Listeners =====
 
-// Search input
-if (searchInput) {
-  searchInput.addEventListener('input', (e) => {
-    filterDeals(e.target.value);
-  });
-}
-
-// Search form submit
-if (searchForm) {
-  searchForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    saveSearch(searchInput.value);
-    filterDeals(searchInput.value);
-  });
-}
+// Search
+searchInput?.addEventListener('input', (e) => filterDeals(e.target.value));
+searchForm?.addEventListener('submit', (e) => {
+  e.preventDefault();
+  Storage.saveSearch(searchInput.value);
+  filterDeals(searchInput.value);
+});
 
 // Category filter
 categoryLinks.forEach(link => {
   link.addEventListener('click', (e) => {
     e.preventDefault();
-    const category = link.textContent.trim();
-    const catMap = {
-      '📱 Electronics': 'electronics',
-      '👗 Fashion': 'fashion',
-      '🏠 Home & Living': 'home',
-      '🍎 Groceries': 'grocery',
-      '⚽️ Sports': 'sports',
-      '💻 Computers & Tech': 'computers',
-      '🤖 AI & Software': 'electronics'
-    };
-    const term = catMap[category] || '';
+    const term = categoryMap[link.textContent.trim()] || '';
     searchInput.value = term;
     filterDeals(term);
-    document.getElementById('deals').scrollIntoView({ behavior: 'smooth' });
+    smoothScrollTo('#deals');
   });
 });
 
-// Smooth scroll for nav links
-document.querySelectorAll('header nav a').forEach(link => {
+// Nav links
+querySelectorAll('header nav a').forEach(link => {
   link.addEventListener('click', (e) => {
     const href = link.getAttribute('href');
     if (href.startsWith('#')) {
       e.preventDefault();
-      const target = document.querySelector(href);
-      if (target) {
-        target.scrollIntoView({ behavior: 'smooth' });
-      }
+      smoothScrollTo(href);
     }
   });
 });
 
-// Newsletter form
-const newsletterForm = document.querySelector('#newsletter form');
+// Newsletter
+const newsletterForm = querySelector('#newsletter form');
 if (newsletterForm) {
   newsletterForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const email = document.getElementById('email').value;
+    const email = getElement('email').value;
     if (email) {
-      saveNewsletter(email);
+      Storage.saveEmail(email);
       alert('🎉 Thanks for subscribing! Your email has been saved.');
-      document.getElementById('email').value = '';
+      getElement('email').value = '';
     }
   });
 
   // Pre-fill saved email
-  const savedEmail = getNewsletter();
-  if (savedEmail) {
-    document.getElementById('email').value = savedEmail;
-  }
+  const savedEmail = Storage.getEmail();
+  if (savedEmail) getElement('email').value = savedEmail;
 }
 
-// Scroll to top button
-const scrollTopBtn = document.querySelector('.scroll-top');
+// Scroll to top
+const scrollTopBtn = querySelector('.scroll-top');
 if (scrollTopBtn) {
   window.addEventListener('scroll', () => {
     if (window.scrollY > 400) {
@@ -292,29 +314,10 @@ if (scrollTopBtn) {
   });
 }
 
-// ===== Favorites Counter in Header =====
-function updateFavCount() {
-  const data = getPrefs();
-  const count = data.favorites.length;
-  const headerNav = document.querySelector('header nav');
-
-  // Remove existing counter if any
-  const existing = headerNav.querySelector('.fav-count');
-  if (existing) existing.remove();
-
-  if (count > 0) {
-    const span = document.createElement('span');
-    span.className = 'fav-count';
-    span.style.cssText = 'margin-left:auto;background:#ef4444;color:#fff;padding:0.25rem 0.625rem;border-radius:50px;font-size:0.8rem;font-weight:700;';
-    span.textContent = `❤️ ${count} saved`;
-    headerNav.appendChild(span);
-  }
-}
-
 // ===== Initialize =====
 document.addEventListener('DOMContentLoaded', () => {
   fetchDeals();
   updateFavCount();
-  console.log('DealBuddy is loaded! 🛍️');
-  console.log('Saved data:', getPrefs());
+  console.log('DealBuddy v2.0 loaded! 🛍️');
+  console.log('Saved data:', Storage.load());
 });
