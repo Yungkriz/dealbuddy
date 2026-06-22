@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DealBuddy — React Hooks Edition</title>
+  <title>DealBuddy — Multi-Page React App</title>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.development.js" crossorigin></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }
@@ -16,37 +17,29 @@
 
     .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; }
     .header nav { display: flex; align-items: center; gap: 2rem; max-width: 1200px; margin: 0 auto; }
-    .header nav a { color: #e2e8f0; font-weight: 500; }
+    .header nav a { color: #e2e8f0; font-weight: 500; transition: color 0.2s; }
     .header nav a:hover { color: #fff; }
     .header nav a:first-child { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
     .fav-count { background: #ef4444; color: #fff; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
-    .cart-count { background: #16a34a; color: #fff; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
+    .cart-count { background: #16a34a; color: #fff; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
 
-    .hero { text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; position: relative; overflow: hidden; }
-    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; position: relative; z-index: 1; }
-    .hero p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9; position: relative; z-index: 1; }
-    .hero form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero { text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
+    .hero p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9; }
+    .hero form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 500px; margin: 0 auto; }
     .hero input { padding: 1rem 1.5rem; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 1rem; width: 100%; background: rgba(255,255,255,0.15); color: #fff; }
     .hero input::placeholder { color: rgba(255,255,255,0.6); }
     .hero input:focus { outline: none; border-color: #f59e0b; background: rgba(255,255,255,0.25); }
     .hero button { padding: 1rem 2rem; background: linear-gradient(135deg, #f59e0b, #f97316); color: #1e293b; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; }
-    .hero button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); }
-    .search-hint { font-size: 0.85rem; opacity: 0.7; margin-top: 0.5rem; }
-
-    .stats-bar { background: #fff; padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; }
-    .stats-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; }
-    .stat-item { text-align: center; }
-    .stat-number { font-size: 1.75rem; font-weight: 800; color: #667eea; }
-    .stat-label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
 
     .deals { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
     .deals h2 { font-size: 1.75rem; margin-bottom: 2rem; text-align: center; }
     .deals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
-    .deal-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .deal-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: transform 0.3s; }
     .deal-card:hover { transform: translateY(-8px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
     .deal-card:hover img { transform: scale(1.05); }
-    .deal-card img { width: 100%; height: 200px; object-fit: cover; transition: transform 0.3s ease; }
+    .deal-card img { width: 100%; height: 200px; object-fit: cover; transition: transform 0.3s; }
     .deal-card-body { padding: 1.25rem; }
     .deal-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
     .deal-card .price { font-size: 1.1rem; }
@@ -56,44 +49,44 @@
     .deal-card .retailer { color: #64748b; font-size: 0.85rem; margin-top: 0.25rem; }
     .deal-card-actions { display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; }
     .deal-card-actions a { font-weight: 600; color: #667eea; font-size: 0.9rem; }
-    .deal-card-actions a:hover { color: #764ba2; }
     .badge { position: absolute; top: 0.5rem; left: 0.5rem; background: #fff; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #667eea; }
-    .fav-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
-    .fav-btn:hover { transform: scale(1.2); }
-    .add-cart-btn { padding: 0.5rem 1rem; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: #475569; }
-    .add-cart-btn:hover { border-color: #667eea; color: #667eea; }
-    .add-cart-btn.added { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
+    .fav-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
     .categories { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
     .categories h2 { font-size: 1.75rem; margin-bottom: 2rem; }
     .categories ul { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
-    .categories li a { display: inline-block; padding: 0.75rem 1.5rem; background: #fff; border: 2px solid #e2e8f0; border-radius: 50px; font-weight: 600; color: #475569; transition: all 0.3s ease; }
+    .categories li a { display: inline-block; padding: 0.75rem 1.5rem; background: #fff; border: 2px solid #e2e8f0; border-radius: 50px; font-weight: 600; color: #475569; transition: all 0.3s; }
     .categories li a:hover, .categories li a.active { border-color: #667eea; color: #667eea; transform: translateY(-2px); }
 
-    .newsletter { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 4rem 2rem; text-align: center; color: #fff; }
-    .newsletter h2 { font-size: 1.75rem; margin-bottom: 1rem; }
-    .newsletter p { opacity: 0.8; margin-bottom: 2rem; }
-    .newsletter form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 450px; margin: 0 auto; }
-    .newsletter input { padding: 1rem 1.5rem; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 1rem; width: 100%; background: rgba(255,255,255,0.15); color: #fff; }
-    .newsletter input::placeholder { color: rgba(255,255,255,0.6); }
-    .newsletter input:focus { outline: none; border-color: #f59e0b; }
-    .newsletter button { padding: 1rem 2rem; background: linear-gradient(135deg, #f59e0b, #f97316); color: #1e293b; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-    .newsletter .success-msg { background: rgba(22, 163, 74, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; }
+    .page-about { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+    .page-about h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #1e293b; }
+    .page-about p { color: #64748b; margin-bottom: 1.5rem; line-height: 1.8; }
+    .page-about .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .page-about .tech-item { background: #fff; padding: 1.5rem; border-radius: 12px; text-align: center; font-weight: 600; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
 
-    .footer { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 3rem 2rem; text-align: center; }
+    .page-contact { padding: 4rem 2rem; max-width: 600px; margin: 0 auto; text-align: center; }
+    .page-contact h1 { font-size: 2rem; margin-bottom: 1rem; color: #1e293b; }
+    .page-contact p { color: #64748b; margin-bottom: 2rem; }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
+    .contact-form label { font-weight: 600; color: #374151; }
+    .contact-form input, .contact-form textarea { padding: 0.875rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; transition: border-color 0.2s; }
+    .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: #667eea; }
+    .contact-form button { padding: 1rem 2rem; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    .contact-success { background: #dcfce7; color: #166534; padding: 1.5rem; border-radius: 12px; margin-top: 1rem; }
+
+    .footer { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 3rem 2rem; text-align: center; margin-top: 4rem; }
     .footer p { opacity: 0.6; font-size: 0.875rem; }
 
     .loading { text-align: center; padding: 3rem; color: #666; }
     .no-results { text-align: center; color: #666; padding: 2rem; }
-    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #1e293b; color: #fff; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); z-index: 1000; animation: slideIn 0.3s ease; }
-    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #1e293b; color: #fff; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); z-index: 1000; }
+    .not-found { text-align: center; padding: 6rem 2rem; }
+    .not-found h1 { font-size: 4rem; color: #667eea; margin-bottom: 1rem; }
 
     @media (min-width: 768px) {
       .hero form { flex-direction: row; }
       .hero input { flex: 1; width: auto; }
       .hero button { width: auto; }
-      .newsletter form { flex-direction: row; }
-      .newsletter input { flex: 1; width: auto; }
     }
   </style>
 </head>
@@ -103,6 +96,7 @@
 
   <script type="text/babel">
     const { useState, useEffect, useRef, useMemo, useCallback } = React;
+    const { BrowserRouter, Routes, Route, Link, useParams, useNavigate, Navigate } = ReactRouterDOM;
 
     // ===== Data =====
     const dealsData = [
@@ -125,15 +119,12 @@
     };
 
     // ===== Custom Hooks =====
-
-    // Custom Hook: LocalStorage
     function useLocalStorage(key, initialValue) {
       const [storedValue, setStoredValue] = useState(() => {
         try {
           const item = localStorage.getItem(key);
           return item ? JSON.parse(item) : initialValue;
-        } catch (error) {
-          console.error(`Error reading localStorage key "${key}":`, error);
+        } catch {
           return initialValue;
         }
       });
@@ -144,290 +135,91 @@
           setStoredValue(valueToStore);
           localStorage.setItem(key, JSON.stringify(valueToStore));
         } catch (error) {
-          console.error(`Error setting localStorage key "${key}":`, error);
+          console.error('Error setting localStorage:', error);
         }
       }, [key, storedValue]);
 
       return [storedValue, setValue];
     }
 
-    // Custom Hook: Debounce
     function useDebounce(value, delay) {
       const [debouncedValue, setDebouncedValue] = useState(value);
-
       useEffect(() => {
-        const handler = setTimeout(() => {
-          setDebouncedValue(value);
-        }, delay);
-
+        const handler = setTimeout(() => setDebouncedValue(value), delay);
         return () => clearTimeout(handler);
       }, [value, delay]);
-
       return debouncedValue;
-    }
-
-    // Custom Hook: Toast Notification
-    function useToast() {
-      const [toast, setToast] = useState(null);
-
-      const showToast = useCallback((message, duration = 3000) => {
-        setToast(message);
-        setTimeout(() => setToast(null), duration);
-      }, []);
-
-      return { toast, showToast };
-    }
-
-    // Custom Hook: Click Outside Detection
-    function useClickOutside(ref, handler) {
-      useEffect(() => {
-        const listener = (event) => {
-          if (!ref.current || ref.current.contains(event.target)) return;
-          handler();
-        };
-        document.addEventListener('mousedown', listener);
-        return () => document.removeEventListener('mousedown', listener);
-      }, [ref, handler]);
     }
 
     // ===== Components =====
 
-    // Toast Component
-    function Toast({ message }) {
-      if (!message) return null;
-      return <div className="toast">{message}</div>;
-    }
-
-    // Header Component
-    function Header({ favCount, cartCount, onCartClick }) {
+    // Header with NavLink for active state
+    function Header({ favCount, cartCount }) {
       return (
         <header className="header">
           <nav>
-            <a href="/"><strong>DealBuddy</strong></a>
-            <a href="#deals">Deals</a>
-            <a href="#categories">Categories</a>
+            <Link to="/"><strong>DealBuddy</strong></Link>
+            <Link to="/">Deals</Link>
+            <Link to="/categories">Categories</Link>
+            <Link to="/about">About</Link>
+            <Link to="/contact">Contact</Link>
             <div className="header-right">
               {favCount > 0 && <span className="fav-count">❤️ {favCount}</span>}
-              {cartCount > 0 && (
-                <span className="cart-count" onClick={onCartClick} style={{ cursor: 'pointer' }}>
-                  🛒 {cartCount}
-                </span>
-              )}
+              {cartCount > 0 && <span className="cart-count">🛒 {cartCount}</span>}
             </div>
           </nav>
         </header>
       );
     }
 
-    // Hero Component with useRef
-    function Hero({ searchTerm, onSearchChange, onSearchSubmit, totalDeals, searchRef }) {
+    // Layout wrapper with shared structure
+    function Layout({ children, favCount, cartCount }) {
       return (
-        <section className="hero">
-          <h1>Find the Best Deals Near You</h1>
-          <p>Save money on electronics, fashion, home essentials, AI tools, groceries and more.</p>
-          <form onSubmit={onSearchSubmit}>
-            <input
-              ref={searchRef}
-              type="search"
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="e.g. AirPods Pro, Samsung TV, Laptop..."
-              autoFocus
-            />
-            <button type="submit">Search Deals</button>
-          </form>
-          <p className="search-hint">
-            {totalDeals} deals available • Type to filter instantly
-          </p>
-        </section>
-      );
-    }
-
-    // Stats Bar Component
-    function StatsBar({ totalDeals, favCount, cartCount, avgSavings }) {
-      return (
-        <section className="stats-bar">
-          <div className="stats-inner">
-            <div className="stat-item">
-              <div className="stat-number">{totalDeals}</div>
-              <div className="stat-label">Total Deals</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">{favCount}</div>
-              <div className="stat-label">Favorites</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">{cartCount}</div>
-              <div className="stat-label">In Cart</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">${avgSavings}</div>
-              <div className="stat-label">Avg Savings</div>
-            </div>
-          </div>
-        </section>
+        <>
+          <Header favCount={favCount} cartCount={cartCount} />
+          <main>{children}</main>
+          <footer className="footer">
+            <p>© 2026 Owolabi Onaope Christopher. All rights reserved.</p>
+          </footer>
+        </>
       );
     }
 
     // DealCard Component
-    function DealCard({ deal, isFavorite, inCart, onToggleFav, onAddCart, onShowToast }) {
+    function DealCard({ deal, isFavorite, onToggleFav }) {
       const { id, title, price, originalPrice, savings, retailer, image, badge } = deal;
-
-      const handleAddToCart = () => {
-        onAddCart(id);
-        onShowToast(`✅ ${title} added to cart!`);
-      };
+      const navigate = useNavigate();
 
       return (
         <article className="deal-card">
           <div style={{ position: 'relative' }}>
             <img src={image} alt={title} loading="lazy" />
             <span className="badge">{badge}</span>
-            <button
-              className="fav-btn"
-              onClick={() => onToggleFav(id)}
-              title={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-            >
+            <button className="fav-btn" onClick={() => onToggleFav(id)}>
               {isFavorite ? '❤️' : '🤍'}
             </button>
           </div>
           <div className="deal-card-body">
             <h3>{title}</h3>
-            <p className="price">
-              <strong>${price}</strong>
-              <s>${originalPrice}</s>
-            </p>
+            <p className="price"><strong>${price}</strong> <s>${originalPrice}</s></p>
             <p className="savings">Save ${savings} at {retailer}</p>
             <div className="deal-card-actions">
-              <a href="#" onClick={(e) => e.preventDefault()}>View Deal →</a>
-              <button
-                className={`add-cart-btn ${inCart ? 'added' : ''}`}
-                onClick={handleAddToCart}
-                disabled={inCart}
-              >
-                {inCart ? '✓ Added' : '+ Add to Cart'}
-              </button>
+              <Link to={`/deal/${id}`}>View Deal →</Link>
             </div>
           </div>
         </article>
       );
     }
 
-    // DealsList Component
-    function DealsList({ deals, favorites, cart, onToggleFav, onAddCart, onShowToast }) {
-      if (deals.length === 0) {
-        return <p className="no-results">No deals found. Try a different search!</p>;
-      }
-
-      return (
-        <div className="deals-grid">
-          {deals.map(deal => (
-            <DealCard
-              key={deal.id}
-              deal={deal}
-              isFavorite={favorites.includes(deal.id)}
-              inCart={cart.includes(deal.id)}
-              onToggleFav={onToggleFav}
-              onAddCart={onAddCart}
-              onShowToast={onShowToast}
-            />
-          ))}
-        </div>
-      );
-    }
-
-    // Categories Component
-    function Categories({ activeCategory, onCategoryClick }) {
-      const categories = Object.keys(categoryMap);
-
-      return (
-        <section className="categories" id="categories">
-          <h2>Browse by Category</h2>
-          <ul>
-            {categories.map(cat => (
-              <li key={cat}>
-                <a
-                  href="#"
-                  className={activeCategory === categoryMap[cat] ? 'active' : ''}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onCategoryClick(categoryMap[cat]);
-                  }}
-                >
-                  {cat}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      );
-    }
-
-    // Newsletter Component
-    function Newsletter({ onSubscribe }) {
-      const [email, setEmail] = useState('');
-      const [subscribed, setSubscribed] = useState(false);
-
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (email) {
-          onSubscribe(email);
-          setSubscribed(true);
-          setEmail('');
-        }
-      };
-
-      return (
-        <section className="newsletter" id="subscribe">
-          <h2>Subscribe for Weekly Deals</h2>
-          <p>Get the best deals delivered to your inbox every week.</p>
-          {subscribed ? (
-            <div className="success-msg">🎉 Thanks for subscribing! Check your inbox soon.</div>
-          ) : (
-            <form onSubmit={handleSubmit}>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email address"
-                required
-              />
-              <button type="submit">Subscribe</button>
-            </form>
-          )}
-        </section>
-      );
-    }
-
-    // Footer Component
-    function Footer() {
-      return (
-        <footer className="footer">
-          <p>© 2026 Owolabi Onaope Christopher. All rights reserved.</p>
-        </footer>
-      );
-    }
-
-    // ===== Main App Component =====
-    function App() {
-      // Custom Hooks
-      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
-      const [cart, setCart] = useLocalStorage('dealbuddy_cart', []);
-      const { toast, showToast } = useToast();
-
-      // Regular State
+    // Home Page
+    function HomePage() {
       const [searchTerm, setSearchTerm] = useState('');
-      const [activeCategory, setActiveCategory] = useState('');
       const [deals, setDeals] = useState([]);
       const [loading, setLoading] = useState(true);
-
-      // Refs
+      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
+      const debouncedSearch = useDebounce(searchTerm, 300);
       const searchRef = useRef(null);
 
-      // Debounced search
-      const debouncedSearch = useDebounce(searchTerm, 300);
-
-      // Simulate API fetch
       useEffect(() => {
         const timer = setTimeout(() => {
           setDeals(dealsData);
@@ -436,99 +228,239 @@
         return () => clearTimeout(timer);
       }, []);
 
-      // Focus search on mount
-      useEffect(() => {
-        if (!loading && searchRef.current) {
-          searchRef.current.focus();
-        }
-      }, [loading]);
-
-      // Memoized filtered deals
       const filteredDeals = useMemo(() => {
         const term = debouncedSearch.toLowerCase().trim();
-        return deals.filter(({ title, savings, retailer, category }) => {
-          const matchesSearch = !term ||
-            title.toLowerCase().includes(term) ||
-            savings.toString().includes(term) ||
-            retailer.toLowerCase().includes(term);
-          const matchesCategory = !activeCategory || category === activeCategory;
-          return matchesSearch && matchesCategory;
+        return deals.filter(({ title, savings, retailer }) => {
+          if (!term) return true;
+          return title.toLowerCase().includes(term) ||
+                 savings.toString().includes(term) ||
+                 retailer.toLowerCase().includes(term);
         });
-      }, [deals, debouncedSearch, activeCategory]);
+      }, [deals, debouncedSearch]);
 
-      // Memoized average savings
-      const avgSavings = useMemo(() => {
-        if (deals.length === 0) return 0;
-        const total = deals.reduce((sum, d) => sum + d.savings, 0);
-        return Math.round(total / deals.length);
-      }, [deals]);
-
-      // Memoized callbacks
       const handleToggleFav = useCallback((id) => {
-        setFavorites(prev =>
-          prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
-        );
+        setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
       }, [setFavorites]);
-
-      const handleAddCart = useCallback((id) => {
-        setCart(prev =>
-          prev.includes(id) ? prev : [...prev, id]
-        );
-      }, [setCart]);
-
-      const handleCategoryClick = useCallback((category) => {
-        setActiveCategory(prev => prev === category ? '' : category);
-        setSearchTerm(category);
-      }, []);
-
-      const handleSubscribe = useCallback((email) => {
-        const emails = JSON.parse(localStorage.getItem('dealbuddy_emails') || '[]');
-        emails.push({ email, date: new Date().toISOString() });
-        localStorage.setItem('dealbuddy_emails', JSON.stringify(emails));
-        showToast('🎉 Subscribed successfully!');
-      }, [showToast]);
 
       return (
         <>
-          <Header favCount={favorites.length} cartCount={cart.length} />
-          <main>
-            <Hero
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              onSearchSubmit={(e) => e.preventDefault()}
-              totalDeals={deals.length}
-              searchRef={searchRef}
-            />
-            <StatsBar
-              totalDeals={deals.length}
-              favCount={favorites.length}
-              cartCount={cart.length}
-              avgSavings={avgSavings}
-            />
-            <section className="deals" id="deals">
-              <h2>Featured Deals ({filteredDeals.length})</h2>
-              {loading ? (
-                <p className="loading">🔄 Loading deals...</p>
-              ) : (
-                <DealsList
-                  deals={filteredDeals}
-                  favorites={favorites}
-                  cart={cart}
-                  onToggleFav={handleToggleFav}
-                  onAddCart={handleAddCart}
-                  onShowToast={showToast}
-                />
-              )}
-            </section>
-            <Categories
-              activeCategory={activeCategory}
-              onCategoryClick={handleCategoryClick}
-            />
-            <Newsletter onSubscribe={handleSubscribe} />
-          </main>
-          <Footer />
-          <Toast message={toast} />
+          <section className="hero">
+            <h1>Find the Best Deals Near You</h1>
+            <p>Save money on electronics, fashion, home essentials, AI tools, groceries and more.</p>
+            <form onSubmit={(e) => e.preventDefault()}>
+              <input
+                ref={searchRef}
+                type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="e.g. AirPods Pro, Samsung TV, Laptop..."
+              />
+              <button type="submit">Search Deals</button>
+            </form>
+          </section>
+          <section className="deals" id="deals">
+            <h2>Featured Deals ({filteredDeals.length})</h2>
+            {loading ? (
+              <p className="loading">🔄 Loading deals...</p>
+            ) : (
+              <div className="deals-grid">
+                {filteredDeals.map(deal => (
+                  <DealCard key={deal.id} deal={deal} isFavorite={favorites.includes(deal.id)} onToggleFav={handleToggleFav} />
+                ))}
+              </div>
+            )}
+          </section>
+          <section className="categories" id="categories">
+            <h2>Browse by Category</h2>
+            <ul>
+              {Object.keys(categoryMap).map(cat => (
+                <li key={cat}><a href="#">{cat}</a></li>
+              ))}
+            </ul>
+          </section>
         </>
+      );
+    }
+
+    // Deal Detail Page (uses URL params)
+    function DealPage() {
+      const { id } = useParams();
+      const navigate = useNavigate();
+      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
+      const deal = dealsData.find(d => d.id === parseInt(id));
+
+      if (!deal) {
+        return (
+          <div className="not-found">
+            <h1>404</h1>
+            <p>Deal not found.</p>
+            <button onClick={() => navigate('/')}>Go Home</button>
+          </div>
+        );
+      }
+
+      const isFav = favorites.includes(deal.id);
+
+      const handleToggleFav = () => {
+        setFavorites(prev => isFav ? prev.filter(f => f !== deal.id) : [...prev, deal.id]);
+      };
+
+      return (
+        <section className="page-about" style={{ maxWidth: '600px' }}>
+          <img src={deal.image} alt={deal.title} style={{ width: '100%', height: '300px', objectFit: 'cover', marginBottom: '2rem' }} />
+          <h1>{deal.title}</h1>
+            <p style={{ fontSize: '1.5rem', color: '#16a34a', fontWeight: 700 }}>${deal.price}</p>
+          <p style={{ textDecoration: 'line-through', color: '#999' }}>Was ${deal.originalPrice}</p>
+          <p style={{ marginTop: '1rem' }}>Save ${deal.savings} at {deal.retailer}</p>
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <button className="add-cart-btn" onClick={handleToggleFav} style={{ padding: '0.75rem 1.5rem' }}>
+              {isFav ? '❤️ Saved' : '🤍 Save to Favorites'}
+            </button>
+            <button onClick={() => navigate('/')}>← Back to Deals</button>
+          </div>
+        </section>
+      );
+    }
+
+    // Categories Page
+    function CategoriesPage() {
+      const [selectedCategory, setSelectedCategory] = useState('');
+      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
+
+      const filteredDeals = selectedCategory
+        ? dealsData.filter(d => d.category === selectedCategory)
+        : dealsData;
+
+      const handleToggleFav = useCallback((id) => {
+        setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
+      }, [setFavorites]);
+
+      return (
+        <>
+          <section className="categories">
+            <h2>Browse by Category</h2>
+            <ul>
+              <li>
+                <a
+                  href="#"
+                  className={!selectedCategory ? 'active' : ''}
+                  onClick={(e) => { e.preventDefault(''); setSelectedCategory(''); }}
+                >
+                  All Categories
+                </a>
+              </li>
+              {Object.keys(categoryMap).map(cat => (
+                <li key={cat}>
+                  <a
+                    href="#"
+                    className={selectedCategory === categoryMap[cat] ? 'active' : ''}
+                    onClick={(e) => { e.preventDefault(); setSelectedCategory(categoryMap[cat]); }}
+                  >
+                    {cat}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+          <section className="deals">
+            <h2>{selectedCategory ? `${dealsData.filter(d => d.category === selectedCategory).length} deals` : 'All Deals'}</h2>
+            <div className="deals-grid">
+              {filteredDeals.map(deal => (
+                <DealCard key={deal.id} deal={deal} isFavorite={favorites.includes(deal.id)} onToggleFav={handleToggleFav} />
+              ))}
+            </div>
+          </section>
+        </>
+      );
+    }
+
+    // About Page
+    function AboutPage() {
+      return (
+        <section className="page-about">
+          <h1>About DealBuddy</h1>
+          <p>DealBuddy is a modern deal-discovery platform built to help savvy shoppers find the best prices on electronics, fashion, home essentials, and more.</p>
+          <p>Built by <strong>Christopher Owolabi</strong> as part of a 30-day full-stack web development learning path. This project showcases React, modern JavaScript, CSS Grid, responsive design, and professional deployment practices.</p>
+          <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1e293b' }}>Tech Stack</h2>
+          <div className="tech-grid">
+            <div className="tech-item">⚛️ React 18</div>
+            <div className="tech-item">🔀 React Router</div>
+            <div className="tech-item">⚡ JavaScript ES6+</div>
+            <div className="tech-item">🎨 CSS3 / Grid</div>
+            <div className="tech-item">💾 LocalStorage</div>
+            <div className="tech-item">🚀 Netlify</div>
+            <div className="tech-item">🔧 Git & GitHub</div>
+            <div className="tech-item">📱 Responsive</div>
+          </div>
+        </section>
+      );
+    }
+
+    // Contact Page
+    function ContactPage() {
+      const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+      const [submitted, setSubmitted] = useState(false);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setSubmitted(true);
+        setFormData({ name: '', email: '', message: '' });
+      };
+
+      const handleChange = (e) => {
+        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+      };
+
+      return (
+        <section className="page-contact">
+          <h1>Get In Touch</h1>
+          <p>Have a question, project idea, or want to collaborate? Drop me a message!</p>
+          {submitted ? (
+            <div className="contact-success">✅ Message sent successfully! I'll get back to you soon.</div>
+          ) : (
+            <form className="contact-form" onSubmit={handleSubmit}>
+              <label htmlFor="name">Your Name</label>
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Christopher Owolabi" required />
+              <label htmlFor="email">Email Address</label>
+              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" required />
+              <label htmlFor="message">Message</label>
+              <textarea id="message" name="message" value={formData.message} onChange={handleChange} rows="5" placeholder="Tell me about your project..." required></textarea>
+              <button type="submit">Send Message →</button>
+            </form>
+          )}
+        </section>
+      );
+    }
+
+    // 404 Not Found Page
+    function NotFoundPage() {
+      return (
+        <div className="not-found">
+          <h1>404</h1>
+          <p>Oops! This page doesn't exist.</p>
+          <Link to="/">← Go Home</Link>
+        </div>
+      );
+    }
+
+    // ===== Main App with Router =====
+    function App() {
+      const [favorites] = useLocalStorage('dealbuddy_favs', []);
+      const [cart] = useLocalStorage('dealbuddy_cart', []);
+
+      return (
+        <BrowserRouter>
+          <Layout favCount={favorites.length} cartCount={cart.length}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/deal/:id" element={<DealPage />} />
+              <Route path="/categories" element={<CategoriesPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
       );
     }
 
