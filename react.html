@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DealBuddy — React Version</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }
+    a { text-decoration: none; color: #2563eb; }
+    img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; }
+    .header nav { display: flex; align-items: center; gap: 2rem; max-width: 1200px; margin: 0 auto; }
+    .header nav a { color: #e2e8f0; font-weight: 500; }
+    .header nav a:hover { color: #fff; }
+    .header nav a:first-child { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .fav-count { margin-left: auto; background: #ef4444; color: #fff; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
+
+    .hero { text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; position: relative; overflow: hidden; }
+    .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; position: relative; z-index: 1; }
+    .hero p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.9; position: relative; z-index: 1; }
+    .hero form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 500px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero input { padding: 1rem 1.5rem; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 1rem; width: 100%; background: rgba(255,255,255,0.15); color: #fff; }
+    .hero input::placeholder { color: rgba(255,255,255,0.6); }
+    .hero input:focus { outline: none; border-color: #f59e0b; background: rgba(255,255,255,0.25); }
+    .hero button { padding: 1rem 2rem; background: linear-gradient(135deg, #f59e0b, #f97316); color: #1e293b; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; }
+    .hero button:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4); }
+
+    .deals { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
+    .deals h2 { font-size: 1.75rem; margin-bottom: 2rem; text-align: center; }
+    .deals-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .deal-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.06); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .deal-card:hover { transform: translateY(-8px); box-shadow: 0 12px 40px rgba(0,0,0,0.15); }
+    .deal-card:hover img { transform: scale(1.05); }
+    .deal-card img { width: 100%; height: 200px; object-fit: cover; transition: transform 0.3s ease; }
+    .deal-card h3 { padding: 1.25rem 1.25rem 0.5rem; font-size: 1.1rem; font-weight: 700; }
+    .deal-card .price { padding: 0 1.25rem; font-size: 1.1rem; }
+    .deal-card .price strong { color: #1e293b; }
+    .deal-card .price s { color: #999; margin-left: 0.5rem; }
+    .deal-card .savings { padding: 0.25rem 1.25rem; color: #16a34a; font-weight: 600; }
+    .deal-card a { display: inline-block; padding: 0.5rem 1.25rem 1.25rem; font-weight: 600; color: #667eea; }
+    .deal-card a:hover { color: #764ba2; }
+    .badge { position: absolute; top: 0.5rem; left: 0.5rem; background: #fff; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #667eea; }
+    .fav-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); transition: transform 0.2s; }
+    .fav-btn:hover { transform: scale(1.2); }
+
+    .categories { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
+    .categories h2 { font-size: 1.75rem; margin-bottom: 2rem; }
+    .categories ul { list-style: none; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+    .categories li a { display: inline-block; padding: 0.75rem 1.5rem; background: #fff; border: 2px solid #e2e8f0; border-radius: 50px; font-weight: 600; color: #475569; transition: all 0.3s ease; }
+    .categories li a:hover, .categories li a.active { border-color: #667eea; color: #667eea; transform: translateY(-2px); }
+
+    .footer { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 3rem 2rem; text-align: center; }
+    .footer p { opacity: 0.6; font-size: 0.875rem; }
+
+    .loading { text-align: center; padding: 3rem; color: #666; }
+    .no-results { text-align: center; color: #666; padding: 2rem; }
+
+    @media (min-width: 768px) {
+      .hero form { flex-direction: row; }
+      .hero input { flex: 1; width: auto; }
+      .hero button { width: auto; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ===== Data =====
+    const dealsData = [
+      { id: 1, title: "Apple AirPods Pro 3", price: "$180", originalPrice: "$249", savings: "Save $69", retailer: "Amazon", category: "electronics", image: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?w=300&h=200&fit=crop", badge: "Hot Deal" },
+      { id: 2, title: "MacBook Air M5", price: "$949", originalPrice: "$1,099", savings: "Save $150", retailer: "Amazon", category: "computers", image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300&h=200&fit=crop", badge: "Best Seller" },
+      { id: 3, title: "Logitech MX Master 3S", price: "$89.99", originalPrice: "$119.99", savings: "Save $30", retailer: "Amazon", category: "electronics", image: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=300&h=200&fit=crop", badge: "Top Rated" },
+      { id: 4, title: "Samsung 65\" Crystal UHD 4K TV", price: "$329.99", originalPrice: "$469.99", savings: "Save $140", retailer: "Best Buy", category: "electronics", image: "https://images.unsplash.com/photo-1593784991095-a205069470b6?w=300&h=200&fit=crop", badge: "Doorbuster" },
+      { id: 5, title: "Samsung The Frame 65\" TV", price: "$1,199.99", originalPrice: "$1,599.99", savings: "Save $400", retailer: "Best Buy", category: "electronics", image: "https://images.unsplash.com/photo-1461151304267-38535e780c79?w=300&h=200&fit=crop", badge: "Premium" },
+      { id: 6, title: "Samsung 65\" QLED 4K Smart TV", price: "$599.99", originalPrice: "$899.99", savings: "Save $300", retailer: "Best Buy", category: "electronics", image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300&h=200&fit=crop", badge: "Popular" }
+    ];
+
+    const categoryMap = {
+      '📱 Electronics': 'electronics',
+      '👗 Fashion': 'fashion',
+      '🏠 Home & Living': 'home',
+      '🍎 Groceries': 'grocery',
+      '⚽️ Sports': 'sports',
+      '💻 Computers & Tech': 'computers',
+      '🤖 AI & Software': 'electronics'
+    };
+
+    // ===== Components =====
+
+    // Header Component
+    function Header({ favCount }) {
+      return (
+        <header className="header">
+          <nav>
+            <a href="/"><strong>DealBuddy</strong></a>
+            <a href="#deals">Deals</a>
+            <a href="#categories">Categories</a>
+            {favCount > 0 && <span className="fav-count">❤️ {favCount} saved</span>}
+          </nav>
+        </header>
+      );
+    }
+
+    // Hero Component
+    function Hero({ searchTerm, onSearchChange, onSearchSubmit }) {
+      return (
+        <section className="hero">
+          <h1>Find the Best Deals Near You</h1>
+          <p>Save money on electronics, fashion, home essentials, AI tools, groceries and more.</p>
+          <form onSubmit={onSearchSubmit}>
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="e.g. AirPods Pro, Samsung TV, Laptop..."
+            />
+            <button type="submit">Search Deals</button>
+          </form>
+        </section>
+      );
+    }
+
+    // DealCard Component
+    function DealCard({ deal, isFavorite, onToggleFav }) {
+      const { id, title, price, originalPrice, savings, retailer, image, badge } = deal;
+
+      return (
+        <article className="deal-card">
+          <div style={{ position: 'relative' }}>
+            <img src={image} alt={title} loading="lazy" />
+            <span className="badge">{badge}</span>
+            <button
+              className="fav-btn"
+              onClick={() => onToggleFav(id)}
+              title={isFavorite ? 'Saved' : 'Save'}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+          </div>
+          <h3>{title}</h3>
+          <p className="price">
+            <strong>{price}</strong>
+            <s>{originalPrice}</s>
+          </p>
+          <p className="savings">{savings} at {retailer}</p>
+          <a href="#" onClick={(e) => e.preventDefault()}>View Deal →</a>
+        </article>
+      );
+    }
+
+    // DealsList Component
+    function DealsList({ deals, favorites, onToggleFav }) {
+      if (deals.length === 0) {
+        return <p className="no-results">No deals found. Try a different search!</p>;
+      }
+
+      return (
+        <div className="deals-grid">
+          {deals.map(deal => (
+            <DealCard
+              key={deal.id}
+              deal={deal}
+              isFavorite={favorites.includes(deal.id)}
+              onToggleFav={onToggleFav}
+            />
+          ))}
+        </div>
+      );
+    }
+
+    // Categories Component
+    function Categories({ activeCategory, onCategoryClick }) {
+      const categories = Object.keys(categoryMap);
+
+      return (
+        <section className="categories" id="categories">
+          <h2>Browse by Category</h2>
+          <ul>
+            {categories.map(cat => (
+              <li key={cat}>
+                <a
+                  href="#"
+                  className={activeCategory === categoryMap[cat] ? 'active' : ''}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onCategoryClick(categoryMap[cat]);
+                  }}
+                >
+                  {cat}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    }
+
+    // Footer Component
+    function Footer() {
+      return (
+        <footer className="footer">
+          <p>© 2026 Owolabi Onaope Christopher. All rights reserved.</p>
+        </footer>
+      );
+    }
+
+    // ===== Main App Component =====
+    function App() {
+      const [searchTerm, setSearchTerm] = useState('');
+      const [favorites, setFavorites] = useState(() => {
+        const saved = localStorage.getItem('dealbuddy_favs');
+        return saved ? JSON.parse(saved) : [];
+      });
+      const [activeCategory, setActiveCategory] = useState('');
+      const [deals, setDeals] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      // Simulate API fetch
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          setDeals(dealsData);
+          setLoading(false);
+        }, 800);
+        return () => clearTimeout(timer);
+      }, []);
+
+      // Load favorites from localStorage
+      useEffect(() => {
+        localStorage.setItem('dealbuddy_favs', JSON.stringify(favorites));
+      }, [favorites]);
+
+      // Filter deals
+      const filteredDeals = deals.filter(deal => {
+        const term = searchTerm.toLowerCase().trim();
+        const matchesSearch = !term || 
+          deal.title.toLowerCase().includes(term) ||
+          deal.savings.toLowerCase().includes(term) ||
+          deal.retailer.toLowerCase().includes(term);
+
+        const matchesCategory = !activeCategory || deal.category === activeCategory;
+
+        return matchesSearch && matchesCategory;
+      });
+
+      const handleToggleFav = (id) => {
+        setFavorites(prev => 
+          prev.includes(id) 
+            ? prev.filter(fid => fid !== id)
+            : [...prev, id]
+        );
+      };
+
+      const handleCategoryClick = (category) => {
+        setActiveCategory(prev => prev === category ? '' : category);
+        setSearchTerm(category);
+      };
+
+      return (
+        <>
+          <Header favCount={favorites.length} />
+          <main>
+            <Hero
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              onSearchSubmit={(e) => e.preventDefault()}
+            />
+            <section className="deals" id="deals">
+              <h2>Featured Deals</h2>
+              {loading ? (
+                <p className="loading">🔄 Loading deals...</p>
+              ) : (
+                <DealsList
+                  deals={filteredDeals}
+                  favorites={favorites}
+                  onToggleFav={handleToggleFav}
+                />
+              )}
+            </section>
+            <Categories
+              activeCategory={activeCategory}
+              onCategoryClick={handleCategoryClick}
+            />
+          </main>
+          <Footer />
+        </>
+      );
+    }
+
+    // ===== Render =====
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
