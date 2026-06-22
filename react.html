@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DealBuddy — Multi-Page React App</title>
+  <title>DealBuddy — Context API Edition</title>
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -16,13 +16,16 @@
     img { max-width: 100%; height: auto; border-radius: 8px; }
 
     .header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); padding: 1rem 2rem; position: sticky; top: 0; z-index: 100; }
-    .header nav { display: flex; align-items: center; gap: 2rem; max-width: 1200px; margin: 0 auto; }
+    .header nav { display: flex; align-items: center; gap: 2rem; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; }
     .header nav a { color: #e2e8f0; font-weight: 500; transition: color 0.2s; }
     .header nav a:hover { color: #fff; }
     .header nav a:first-child { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .header-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
-    .fav-count { background: #ef4444; color: #fff; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
-    .cart-count { background: #16a34a; color: #fff; padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .badge-count { padding: 0.25rem 0.625rem; border-radius: 50px; font-size: 0.8rem; font-weight: 700; }
+    .fav-badge { background: #ef4444; color: #fff; }
+    .cart-badge { background: #16a34a; color: #fff; cursor: pointer; }
+    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #1e293b; color: #fff; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); z-index: 1000; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
     .hero { text-align: center; padding: 5rem 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: #fff; }
     .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
@@ -32,6 +35,12 @@
     .hero input::placeholder { color: rgba(255,255,255,0.6); }
     .hero input:focus { outline: none; border-color: #f59e0b; background: rgba(255,255,255,0.25); }
     .hero button { padding: 1rem 2rem; background: linear-gradient(135deg, #f59e0b, #f97316); color: #1e293b; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; width: 100%; }
+
+    .stats-bar { background: #fff; padding: 1.5rem 2rem; border-bottom: 1px solid #e2e8f0; }
+    .stats-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap; }
+    .stat-item { text-align: center; }
+    .stat-number { font-size: 1.75rem; font-weight: 800; color: #667eea; }
+    .stat-label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
 
     .deals { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; }
     .deals h2 { font-size: 1.75rem; margin-bottom: 2rem; text-align: center; }
@@ -49,8 +58,10 @@
     .deal-card .retailer { color: #64748b; font-size: 0.85rem; margin-top: 0.25rem; }
     .deal-card-actions { display: flex; gap: 0.75rem; margin-top: 1rem; align-items: center; }
     .deal-card-actions a { font-weight: 600; color: #667eea; font-size: 0.9rem; }
-    .badge { position: absolute; top: 0.5rem; left: 0.5rem; background: #fff; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #667eea; }
+    .card-badge { position: absolute; top: 0.5rem; left: 0.5rem; background: #fff; padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; color: #667eea; }
     .fav-btn { position: absolute; top: 0.5rem; right: 0.5rem; background: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+    .add-cart-btn { padding: 0.5rem 1rem; background: #f1f5f9; border: 2px solid #e2e8f0; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; color: #475569; }
+    .add-cart-btn.added { background: #dcfce7; border-color: #16a34a; color: #16a34a; }
 
     .categories { padding: 4rem 2rem; max-width: 1200px; margin: 0 auto; text-align: center; }
     .categories h2 { font-size: 1.75rem; margin-bottom: 2rem; }
@@ -58,16 +69,36 @@
     .categories li a { display: inline-block; padding: 0.75rem 1.5rem; background: #fff; border: 2px solid #e2e8f0; border-radius: 50px; font-weight: 600; color: #475569; transition: all 0.3s; }
     .categories li a:hover, .categories li a.active { border-color: #667eea; color: #667eea; transform: translateY(-2px); }
 
-    .page-about { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
-    .page-about h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #1e293b; }
-    .page-about p { color: #64748b; margin-bottom: 1.5rem; line-height: 1.8; }
-    .page-about .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 2rem; }
-    .page-about .tech-item { background: #fff; padding: 1.5rem; border-radius: 12px; text-align: center; font-weight: 600; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+    .newsletter { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 4rem 2rem; text-align: center; color: #fff; }
+    .newsletter h2 { font-size: 1.75rem; margin-bottom: 1rem; }
+    .newsletter p { opacity: 0.8; margin-bottom: 2rem; }
+    .newsletter form { display: flex; flex-direction: column; gap: 0.75rem; max-width: 450px; margin: 0 auto; }
+    .newsletter input { padding: 1rem 1.5rem; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 1rem; width: 100%; background: rgba(255,255,255,0.15); color: #fff; }
+    .newsletter input::placeholder { color: rgba(255,255,255,0.6); }
+    .newsletter input:focus { outline: none; border-color: #f59e0b; }
+    .newsletter button { padding: 1rem 2rem; background: linear-gradient(135deg, #f59e0b, #f97316); color: #1e293b; border: none; border-radius: 12px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+    .newsletter .success-msg { background: rgba(22, 163, 74, 0.2); padding: 1rem; border-radius: 8px; margin-top: 1rem; }
 
-    .page-contact { padding: 4rem 2rem; max-width: 600px; margin: 0 auto; text-align: center; }
-    .page-contact h1 { font-size: 2rem; margin-bottom: 1rem; color: #1e293b; }
-    .page-contact p { color: #64748b; margin-bottom: 2rem; }
-    .contact-form { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
+    .cart-drawer { position: fixed; top: 0; right: 0; width: 350px; max-width: 90vw; height: 100vh; background: #fff; box-shadow: -4px 0 30px rgba(0,0,0,0.15); z-index: 200; padding: 2rem; overflow-y: auto; animation: slideLeft 0.3s ease; }
+    @keyframes slideLeft { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .cart-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 199; }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .cart-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+    .cart-item { display: flex; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid #e2e8f0; align-items: center; }
+    .cart-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+    .cart-item-info { flex: 1; }
+    .cart-item-title { font-weight: 600; font-size: 0.9rem; }
+    .cart-item-price { color: #16a34a; font-weight: 700; }
+    .cart-empty { text-align: center; padding: 3rem 1rem; color: #64748b; }
+    .cart-total { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; padding-top: 1rem; border-top: 2px solid #e2e8f0; }
+
+    .page-about, .page-contact { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+    .page-about h1, .page-contact h1 { font-size: 2rem; margin-bottom: 1.5rem; color: #1e293b; }
+    .page-about p { color: #64748b; margin-bottom: 1.5rem; line-height: 1.8; }
+    .tech-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 2rem; }
+    .tech-item { background: #fff; padding: 1.5rem; border-radius: 12px; text-align: center; font-weight: 600; color: #667eea; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; max-width: 500px; margin: 0 auto; }
     .contact-form label { font-weight: 600; color: #374151; }
     .contact-form input, .contact-form textarea { padding: 0.875rem 1.25rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; transition: border-color 0.2s; }
     .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: #667eea; }
@@ -76,17 +107,17 @@
 
     .footer { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #fff; padding: 3rem 2rem; text-align: center; margin-top: 4rem; }
     .footer p { opacity: 0.6; font-size: 0.875rem; }
-
-    .loading { text-align: center; padding: 3rem; color: #666; }
-    .no-results { text-align: center; color: #666; padding: 2rem; }
-    .toast { position: fixed; bottom: 2rem; right: 2rem; background: #1e293b; color: #fff; padding: 1rem 1.5rem; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.2); z-index: 1000; }
     .not-found { text-align: center; padding: 6rem 2rem; }
     .not-found h1 { font-size: 4rem; color: #667eea; margin-bottom: 1rem; }
+    .loading { text-align: center; padding: 3rem; color: #666; }
+    .no-results { text-align: center; color: #666; padding: 2rem; }
 
     @media (min-width: 768px) {
       .hero form { flex-direction: row; }
       .hero input { flex: 1; width: auto; }
       .hero button { width: auto; }
+      .newsletter form { flex-direction: row; }
+      .newsletter input { flex: 1; width: auto; }
     }
   </style>
 </head>
@@ -95,8 +126,8 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo, useCallback } = React;
-    const { BrowserRouter, Routes, Route, Link, useParams, useNavigate, Navigate } = ReactRouterDOM;
+    const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext, useReducer } = React;
+    const { BrowserRouter, Routes, Route, Link, useParams, useNavigate } = ReactRouterDOM;
 
     // ===== Data =====
     const dealsData = [
@@ -118,43 +149,95 @@
       '🤖 AI & Software': 'electronics'
     };
 
-    // ===== Custom Hooks =====
-    function useLocalStorage(key, initialValue) {
-      const [storedValue, setStoredValue] = useState(() => {
-        try {
-          const item = localStorage.getItem(key);
-          return item ? JSON.parse(item) : initialValue;
-        } catch {
-          return initialValue;
-        }
-      });
+    // ===== CONTEXT & REDUCER (Global State) =====
 
-      const setValue = useCallback((value) => {
-        try {
-          const valueToStore = value instanceof Function ? value(storedValue) : value;
-          setStoredValue(valueToStore);
-          localStorage.setItem(key, JSON.stringify(valueToStore));
-        } catch (error) {
-          console.error('Error setting localStorage:', error);
-        }
-      }, [key, storedValue]);
+    // Initial state from localStorage
+    const getInitialState = () => {
+      try {
+        const saved = localStorage.getItem('dealbuddy_state');
+        if (saved) return JSON.parse(saved);
+      } catch {}
+      return { favorites: [], cart: [], toast: null };
+    };
 
-      return [storedValue, setValue];
+    // Reducer function — handles all state updates
+    function appReducer(state, action) {
+      let newState;
+      switch (action.type) {
+        case 'ADD_FAVORITE':
+          newState = { ...state, favorites: [...state.favorites, action.payload], toast: '❤️ Added to favorites!' };
+          break;
+        case 'REMOVE_FAVORITE':
+          newState = { ...state, favorites: state.favorites.filter(id => id !== action.payload), toast: '💔 Removed from favorites' };
+          break;
+        case 'ADD_TO_CART':
+          if (state.cart.find(item => item.id === action.payload.id)) {
+            newState = { ...state, toast: 'Already in cart!' };
+          } else {
+            newState = { ...state, cart: [...state.cart, action.payload], toast: `🛒 ${action.payload.title} added to cart!` };
+          }
+          break;
+        case 'REMOVE_FROM_CART':
+          newState = { ...state, cart: state.cart.filter(item => item.id !== action.payload), toast: 'Removed from cart' };
+          break;
+        case 'CLEAR_CART':
+          newState = { ...state, cart: [], toast: 'Cart cleared' };
+          break;
+        case 'SHOW_TOAST':
+          newState = { ...state, toast: action.payload };
+          break;
+        case 'CLEAR_TOAST':
+          newState = { ...state, toast: null };
+          break;
+        default:
+          return state;
+      }
+      // Persist to localStorage
+      localStorage.setItem('dealbuddy_state', JSON.stringify(newState));
+      return newState;
     }
 
-    function useDebounce(value, delay) {
-      const [debouncedValue, setDebouncedValue] = useState(value);
+    // Create Context
+    const AppContext = createContext();
+
+    // Provider Component
+    function AppProvider({ children }) {
+      const [state, dispatch] = useReducer(appReducer, null, getInitialState);
+
+      // Auto-clear toast after 3 seconds
       useEffect(() => {
-        const handler = setTimeout(() => setDebouncedValue(value), delay);
-        return () => clearTimeout(handler);
-      }, [value, delay]);
-      return debouncedValue;
+        if (state.toast) {
+          const timer = setTimeout(() => dispatch({ type: 'CLEAR_TOAST' }), 3000);
+          return () => clearTimeout(timer);
+        }
+      }, [state.toast]);
+
+      return (
+        <AppContext.Provider value={{ state, dispatch }}>
+          {children}
+        </AppContext.Provider>
+      );
     }
 
-    // ===== Components =====
+    // Custom hook to use context
+    function useApp() {
+      const context = useContext(AppContext);
+      if (!context) throw new Error('useApp must be used within AppProvider');
+      return context;
+    }
 
-    // Header with NavLink for active state
-    function Header({ favCount, cartCount }) {
+    // ===== COMPONENTS =====
+
+    // Toast Component
+    function Toast() {
+      const { state } = useApp();
+      if (!state.toast) return null;
+      return <div className="toast">{state.toast}</div>;
+    }
+
+    // Header Component
+    function Header({ onCartClick }) {
+      const { state } = useApp();
       return (
         <header className="header">
           <nav>
@@ -164,47 +247,94 @@
             <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
             <div className="header-right">
-              {favCount > 0 && <span className="fav-count">❤️ {favCount}</span>}
-              {cartCount > 0 && <span className="cart-count">🛒 {cartCount}</span>}
+              {state.favorites.length > 0 && <span className="badge-count fav-badge">❤️ {state.favorites.length}</span>}
+              {state.cart.length > 0 && <span className="badge-count cart-badge" onClick={onCartClick}>🛒 {state.cart.length}</span>}
             </div>
           </nav>
         </header>
       );
     }
 
-    // Layout wrapper with shared structure
-    function Layout({ children, favCount, cartCount }) {
+    // Cart Drawer Component
+    function CartDrawer({ isOpen, onClose }) {
+      const { state, dispatch } = useApp();
+      if (!isOpen) return null;
+
+      const total = state.cart.reduce((sum, item) => sum + item.price, 0);
+
       return (
         <>
-          <Header favCount={favCount} cartCount={cartCount} />
+          <div className="cart-overlay" onClick={onClose} />
+          <div className="cart-drawer">
+            <div className="cart-header">
+              <h3>🛒 Your Cart ({state.cart.length})</h3>
+              <button className="cart-close" onClick={onClose}>✕</button>
+            </div>
+            {state.cart.length === 0 ? (
+              <div className="cart-empty">Your cart is empty</div>
+            ) : (
+              <>
+                {state.cart.map(item => (
+                  <div key={item.id} className="cart-item">
+                    <img src={item.image} alt={item.title} />
+                    <div className="cart-item-info">
+                      <div className="cart-item-title">{item.title}</div>
+                      <div className="cart-item-price">${item.price}</div>
+                    </div>
+                    <button onClick={() => dispatch({ type: 'REMOVE_FROM_CART', payload: item.id })} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}>✕</button>
+                  </div>
+                ))}
+                <div className="cart-total">
+                  Total: ${total.toFixed(2)}
+                  <button onClick={() => dispatch({ type: 'CLEAR_CART' })} style={{ float: 'right', padding: '0.25rem 0.75rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>Clear</button>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      );
+    }
+
+    // Layout Component
+    function Layout({ children }) {
+      const [cartOpen, setCartOpen] = useState(false);
+      return (
+        <>
+          <Header onCartClick={() => setCartOpen(true)} />
           <main>{children}</main>
           <footer className="footer">
             <p>© 2026 Owolabi Onaope Christopher. All rights reserved.</p>
           </footer>
+          <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+          <Toast />
         </>
       );
     }
 
     // DealCard Component
-    function DealCard({ deal, isFavorite, onToggleFav }) {
-      const { id, title, price, originalPrice, savings, retailer, image, badge } = deal;
-      const navigate = useNavigate();
+    function DealCard({ deal }) {
+      const { state, dispatch } = useApp();
+      const isFav = state.favorites.includes(deal.id);
+      const inCart = state.cart.find(item => item.id === deal.id);
 
       return (
         <article className="deal-card">
           <div style={{ position: 'relative' }}>
-            <img src={image} alt={title} loading="lazy" />
-            <span className="badge">{badge}</span>
-            <button className="fav-btn" onClick={() => onToggleFav(id)}>
-              {isFavorite ? '❤️' : '🤍'}
+            <img src={deal.image} alt={deal.title} loading="lazy" />
+            <span className="card-badge">{deal.badge}</span>
+            <button className="fav-btn" onClick={() => dispatch({ type: isFav ? 'REMOVE_FAVORITE' : 'ADD_FAVORITE', payload: deal.id })}>
+              {isFav ? '❤️' : '🤍'}
             </button>
           </div>
           <div className="deal-card-body">
-            <h3>{title}</h3>
-            <p className="price"><strong>${price}</strong> <s>${originalPrice}</s></p>
-            <p className="savings">Save ${savings} at {retailer}</p>
+            <h3>{deal.title}</h3>
+            <p className="price"><strong>${deal.price}</strong> <s>${deal.originalPrice}</s></p>
+            <p className="savings">Save ${deal.savings} at {deal.retailer}</p>
             <div className="deal-card-actions">
-              <Link to={`/deal/${id}`}>View Deal →</Link>
+              <Link to={`/deal/${deal.id}`}>View Deal →</Link>
+              <button className={`add-cart-btn ${inCart ? 'added' : ''}`} onClick={() => dispatch({ type: 'ADD_TO_CART', payload: deal })} disabled={!!inCart}>
+                {inCart ? '✓ Added' : '+ Cart'}
+              </button>
             </div>
           </div>
         </article>
@@ -216,15 +346,10 @@
       const [searchTerm, setSearchTerm] = useState('');
       const [deals, setDeals] = useState([]);
       const [loading, setLoading] = useState(true);
-      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
       const debouncedSearch = useDebounce(searchTerm, 300);
-      const searchRef = useRef(null);
 
       useEffect(() => {
-        const timer = setTimeout(() => {
-          setDeals(dealsData);
-          setLoading(false);
-        }, 800);
+        const timer = setTimeout(() => { setDeals(dealsData); setLoading(false); }, 800);
         return () => clearTimeout(timer);
       }, []);
 
@@ -232,15 +357,9 @@
         const term = debouncedSearch.toLowerCase().trim();
         return deals.filter(({ title, savings, retailer }) => {
           if (!term) return true;
-          return title.toLowerCase().includes(term) ||
-                 savings.toString().includes(term) ||
-                 retailer.toLowerCase().includes(term);
+          return title.toLowerCase().includes(term) || savings.toString().includes(term) || retailer.toLowerCase().includes(term);
         });
       }, [deals, debouncedSearch]);
-
-      const handleToggleFav = useCallback((id) => {
-        setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
-      }, [setFavorites]);
 
       return (
         <>
@@ -248,75 +367,55 @@
             <h1>Find the Best Deals Near You</h1>
             <p>Save money on electronics, fashion, home essentials, AI tools, groceries and more.</p>
             <form onSubmit={(e) => e.preventDefault()}>
-              <input
-                ref={searchRef}
-                type="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="e.g. AirPods Pro, Samsung TV, Laptop..."
-              />
+              <input type="search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="e.g. AirPods Pro, Samsung TV, Laptop..." />
               <button type="submit">Search Deals</button>
             </form>
           </section>
           <section className="deals" id="deals">
             <h2>Featured Deals ({filteredDeals.length})</h2>
-            {loading ? (
-              <p className="loading">🔄 Loading deals...</p>
-            ) : (
+            {loading ? <p className="loading">🔄 Loading deals...</p> : (
               <div className="deals-grid">
-                {filteredDeals.map(deal => (
-                  <DealCard key={deal.id} deal={deal} isFavorite={favorites.includes(deal.id)} onToggleFav={handleToggleFav} />
-                ))}
+                {filteredDeals.map(deal => <DealCard key={deal.id} deal={deal} />)}
               </div>
             )}
           </section>
           <section className="categories" id="categories">
             <h2>Browse by Category</h2>
             <ul>
-              {Object.keys(categoryMap).map(cat => (
-                <li key={cat}><a href="#">{cat}</a></li>
-              ))}
+              {Object.keys(categoryMap).map(cat => <li key={cat}><a href="#">{cat}</a></li>)}
             </ul>
           </section>
         </>
       );
     }
 
-    // Deal Detail Page (uses URL params)
+    // Deal Detail Page
     function DealPage() {
       const { id } = useParams();
       const navigate = useNavigate();
-      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
+      const { state, dispatch } = useApp();
       const deal = dealsData.find(d => d.id === parseInt(id));
 
-      if (!deal) {
-        return (
-          <div className="not-found">
-            <h1>404</h1>
-            <p>Deal not found.</p>
-            <button onClick={() => navigate('/')}>Go Home</button>
-          </div>
-        );
-      }
+      if (!deal) return <div className="not-found"><h1>404</h1><p>Deal not found.</p><button onClick={() => navigate('/')}>Go Home</button></div>;
 
-      const isFav = favorites.includes(deal.id);
-
-      const handleToggleFav = () => {
-        setFavorites(prev => isFav ? prev.filter(f => f !== deal.id) : [...prev, deal.id]);
-      };
+      const isFav = state.favorites.includes(deal.id);
+      const inCart = state.cart.find(item => item.id === deal.id);
 
       return (
         <section className="page-about" style={{ maxWidth: '600px' }}>
           <img src={deal.image} alt={deal.title} style={{ width: '100%', height: '300px', objectFit: 'cover', marginBottom: '2rem' }} />
           <h1>{deal.title}</h1>
-            <p style={{ fontSize: '1.5rem', color: '#16a34a', fontWeight: 700 }}>${deal.price}</p>
+          <p style={{ fontSize: '1.5rem', color: '#16a34a', fontWeight: 700 }}>${deal.price}</p>
           <p style={{ textDecoration: 'line-through', color: '#999' }}>Was ${deal.originalPrice}</p>
           <p style={{ marginTop: '1rem' }}>Save ${deal.savings} at {deal.retailer}</p>
-          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-            <button className="add-cart-btn" onClick={handleToggleFav} style={{ padding: '0.75rem 1.5rem' }}>
-              {isFav ? '❤️ Saved' : '🤍 Save to Favorites'}
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button className="add-cart-btn" onClick={() => dispatch({ type: isFav ? 'REMOVE_FAVORITE' : 'ADD_FAVORITE', payload: deal.id })} style={{ padding: '0.75rem 1.5rem' }}>
+              {isFav ? '❤️ Saved' : '🤍 Save'}
             </button>
-            <button onClick={() => navigate('/')}>← Back to Deals</button>
+            <button className={`add-cart-btn ${inCart ? 'added' : ''}`} onClick={() => dispatch({ type: 'ADD_TO_CART', payload: deal })} disabled={!!inCart} style={{ padding: '0.75rem 1.5rem' }}>
+              {inCart ? '✓ In Cart' : '+ Add to Cart'}
+            </button>
+            <button onClick={() => navigate('/')} style={{ padding: '0.75rem 1.5rem', background: '#f1f5f9', border: '2px solid #e2e8f0', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}>← Back</button>
           </div>
         </section>
       );
@@ -325,50 +424,23 @@
     // Categories Page
     function CategoriesPage() {
       const [selectedCategory, setSelectedCategory] = useState('');
-      const [favorites, setFavorites] = useLocalStorage('dealbuddy_favs', []);
 
-      const filteredDeals = selectedCategory
-        ? dealsData.filter(d => d.category === selectedCategory)
-        : dealsData;
-
-      const handleToggleFav = useCallback((id) => {
-        setFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
-      }, [setFavorites]);
+      const filteredDeals = selectedCategory ? dealsData.filter(d => d.category === selectedCategory) : dealsData;
 
       return (
         <>
           <section className="categories">
             <h2>Browse by Category</h2>
             <ul>
-              <li>
-                <a
-                  href="#"
-                  className={!selectedCategory ? 'active' : ''}
-                  onClick={(e) => { e.preventDefault(''); setSelectedCategory(''); }}
-                >
-                  All Categories
-                </a>
-              </li>
+              <li><a href="#" className={!selectedCategory ? 'active' : ''} onClick={(e) => { e.preventDefault(''); setSelectedCategory(''); }}>All</a></li>
               {Object.keys(categoryMap).map(cat => (
-                <li key={cat}>
-                  <a
-                    href="#"
-                    className={selectedCategory === categoryMap[cat] ? 'active' : ''}
-                    onClick={(e) => { e.preventDefault(); setSelectedCategory(categoryMap[cat]); }}
-                  >
-                    {cat}
-                  </a>
-                </li>
+                <li key={cat}><a href="#" className={selectedCategory === categoryMap[cat] ? 'active' : ''} onClick={(e) => { e.preventDefault(); setSelectedCategory(categoryMap[cat]); }}>{cat}</a></li>
               ))}
             </ul>
           </section>
           <section className="deals">
-            <h2>{selectedCategory ? `${dealsData.filter(d => d.category === selectedCategory).length} deals` : 'All Deals'}</h2>
-            <div className="deals-grid">
-              {filteredDeals.map(deal => (
-                <DealCard key={deal.id} deal={deal} isFavorite={favorites.includes(deal.id)} onToggleFav={handleToggleFav} />
-              ))}
-            </div>
+            <h2>{selectedCategory ? `${filteredDeals.length} deals` : 'All Deals'}</h2>
+            <div className="deals-grid">{filteredDeals.map(deal => <DealCard key={deal.id} deal={deal} />)}</div>
           </section>
         </>
       );
@@ -385,11 +457,11 @@
           <div className="tech-grid">
             <div className="tech-item">⚛️ React 18</div>
             <div className="tech-item">🔀 React Router</div>
+            <div className="tech-item">🔗 Context API</div>
             <div className="tech-item">⚡ JavaScript ES6+</div>
             <div className="tech-item">🎨 CSS3 / Grid</div>
             <div className="tech-item">💾 LocalStorage</div>
             <div className="tech-item">🚀 Netlify</div>
-            <div className="tech-item">🔧 Git & GitHub</div>
             <div className="tech-item">📱 Responsive</div>
           </div>
         </section>
@@ -407,24 +479,20 @@
         setFormData({ name: '', email: '', message: '' });
       };
 
-      const handleChange = (e) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
-      };
-
       return (
         <section className="page-contact">
           <h1>Get In Touch</h1>
           <p>Have a question, project idea, or want to collaborate? Drop me a message!</p>
           {submitted ? (
-            <div className="contact-success">✅ Message sent successfully! I'll get back to you soon.</div>
+            <div className="contact-success">✅ Message sent successfully!</div>
           ) : (
             <form className="contact-form" onSubmit={handleSubmit}>
               <label htmlFor="name">Your Name</label>
-              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Christopher Owolabi" required />
+              <input type="text" id="name" name="name" value={formData.name} onChange={(e) => setFormData(p => ({ ...p, [e.target.name]: e.target.value }))} placeholder="Christopher Owolabi" required />
               <label htmlFor="email">Email Address</label>
-              <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} placeholder="you@example.com" required />
+              <input type="email" id="email" name="email" value={formData.email} onChange={(e) => setFormData(p => ({ ...p, [e.target.name]: e.target.value }))} placeholder="you@example.com" required />
               <label htmlFor="message">Message</label>
-              <textarea id="message" name="message" value={formData.message} onChange={handleChange} rows="5" placeholder="Tell me about your project..." required></textarea>
+              <textarea id="message" name="message" value={formData.message} onChange={(e) => setFormData(p => ({ ...p, [e.target.name]: e.target.value }))} rows="5" placeholder="Tell me about your project..." required />
               <button type="submit">Send Message →</button>
             </form>
           )}
@@ -432,35 +500,38 @@
       );
     }
 
-    // 404 Not Found Page
+    // 404 Page
     function NotFoundPage() {
-      return (
-        <div className="not-found">
-          <h1>404</h1>
-          <p>Oops! This page doesn't exist.</p>
-          <Link to="/">← Go Home</Link>
-        </div>
-      );
+      return <div className="not-found"><h1>404</h1><p>Oops! This page doesn't exist.</p><Link to="/">← Go Home</Link></div>;
     }
 
-    // ===== Main App with Router =====
-    function App() {
-      const [favorites] = useLocalStorage('dealbuddy_favs', []);
-      const [cart] = useLocalStorage('dealbuddy_cart', []);
+    // ===== Debounce Hook =====
+    function useDebounce(value, delay) {
+      const [debouncedValue, setDebouncedValue] = useState(value);
+      useEffect(() => {
+        const handler = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(handler);
+      }, [value, delay]);
+      return debouncedValue;
+    }
 
+    // ===== Main App =====
+    function App() {
       return (
-        <BrowserRouter>
-          <Layout favCount={favorites.length} cartCount={cart.length}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/deal/:id" element={<DealPage />} />
-              <Route path="/categories" element={<CategoriesPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
+        <AppProvider>
+          <BrowserRouter>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/deal/:id" element={<DealPage />} />
+                <Route path="/categories" element={<CategoriesPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
+            </Layout>
+          </BrowserRouter>
+        </AppProvider>
       );
     }
 
