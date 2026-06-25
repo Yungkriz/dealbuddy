@@ -20,7 +20,6 @@
     .header-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
     .badge-count{padding:0.25rem 0.625rem;border-radius:50px;font-size:0.8rem;font-weight:700}
     .fav-badge{background:#ef4444;color:#fff}.cart-badge{background:#16a34a;color:#fff;cursor:pointer}
-    .user-badge{background:#667eea;color:#fff;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.8rem}
     .toast{position:fixed;bottom:2rem;right:2rem;background:#1e293b;color:#fff;padding:1rem 1.5rem;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.2);z-index:1000;animation:slideIn 0.3s}
     @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
     .hero{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,#667eea,#764ba2 50%,#f093fb);color:#fff}
@@ -49,11 +48,6 @@
     .categories ul{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem}
     .categories li a{display:inline-block;padding:0.75rem 1.5rem;background:#fff;border:2px solid #e2e8f0;border-radius:50px;font-weight:600;color:#475569;transition:all 0.3s}
     .categories li a:hover,.categories li a.active{border-color:#667eea;color:#667eea;transform:translateY(-2px)}
-    .auth-page{padding:4rem 2rem;max-width:400px;margin:0 auto}.auth-page h1{font-size:1.75rem;margin-bottom:1.5rem;text-align:center}
-    .auth-form{display:flex;flex-direction:column;gap:1rem}.auth-form label{font-weight:600;color:#374151}
-    .auth-form input{padding:0.875rem 1.25rem;border:2px solid #e2e8f0;border-radius:10px;font-size:1rem;transition:border-color 0.2s}.auth-form input:focus{outline:none;border-color:#667eea}
-    .auth-form button{padding:1rem;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer}
-    .auth-error{background:#fee2e2;color:#dc2626;padding:0.75rem;border-radius:8px;margin-bottom:1rem;font-size:0.9rem}
     .newsletter{background:linear-gradient(135deg,#667eea,#764ba2);padding:4rem 2rem;text-align:center;color:#fff}
     .newsletter h2{font-size:1.75rem;margin-bottom:1rem}.newsletter p{opacity:0.8;margin-bottom:2rem}
     .newsletter form{display:flex;flex-direction:column;gap:0.75rem;max-width:450px;margin:0 auto}
@@ -88,16 +82,8 @@
   <div id="root"></div>
   <script type="text/babel">
     const { useState, useEffect, useMemo, useContext, createContext, useReducer } = React;
-    const { BrowserRouter, Routes, Route, Link, useParams, useNavigate } = ReactRouterDOM;
+    const { HashRouter, Routes, Route, Link, useParams, useNavigate } = ReactRouterDOM;
     const API_BASE = 'https://fakestoreapi.com';
-
-    const AppCtx = createContext();
-    function AppProvider({children}) {
-      const [state,dispatch] = useReducer(reducer, null, getInitial);
-      useEffect(()=>{if(state.toast){const t=setTimeout(()=>dispatch({type:'CLEAR_TOAST'}),3000);return()=>clearTimeout(t);}},[state.toast]);
-      return <AppCtx.Provider value={{state,dispatch}}>{children}</AppCtx.Provider>;
-    }
-    function useApp(){ return useContext(AppCtx); }
 
     const getInitial = () => { try { const s=localStorage.getItem('db_state'); if(s) return JSON.parse(s); } catch{} return {favorites:[],cart:[],toast:null}; };
     function reducer(state, action) {
@@ -115,7 +101,15 @@
       localStorage.setItem('db_state',JSON.stringify(n));
       return n;
     }
-function Skeleton(){return <div className="deal-card"><div className="skeleton skeleton-card"></div></div>;}
+    const AppCtx = createContext();
+    function AppProvider({children}) {
+      const [state,dispatch] = useReducer(reducer,null,getInitial);
+      useEffect(()=>{if(state.toast){const t=setTimeout(()=>dispatch({type:'CLEAR_TOAST'}),3000);return()=>clearTimeout(t);}},[state.toast]);
+      return <AppCtx.Provider value={{state,dispatch}}>{children}</AppCtx.Provider>;
+    }
+    function useApp(){ return useContext(AppCtx); }
+
+    function Skeleton(){return <div className="deal-card"><div className="skeleton skeleton-card"></div></div>;}
     function Toast(){const{state}=useApp();return state.toast?<div className="toast">{state.toast}</div>:null;}
 
     function Header({onCartClick}) {
@@ -127,7 +121,6 @@ function Skeleton(){return <div className="deal-card"><div className="skeleton s
             <Link to="/">Deals</Link>
             <Link to="/categories">Categories</Link>
             <Link to="/about">About</Link>
-            <Link to="/login">Login</Link>
             <div className="header-right">
               {state.favorites.length>0&&<span className="badge-count fav-badge">❤️ {state.favorites.length}</span>}
               {state.cart.length>0&&<span className="badge-count cart-badge" onClick={onCartClick}>🛒 {state.cart.length}</span>}
@@ -148,25 +141,22 @@ function Skeleton(){return <div className="deal-card"><div className="skeleton s
     function useDebounce(val,delay){const[dv,setDv]=useState(val);useEffect(()=>{const t=setTimeout(()=>setDv(val),delay);return()=>clearTimeout(t);},[val,delay]);return dv;}
 
     function HomePage(){const[term,setTerm]=useState('');const{data:apiData,loading,error}=useFetch(`${API_BASE}/products`);const debounced=useDebounce(term,300);const deals=useMemo(()=>{if(!apiData)return[];return apiData.map(p=>({id:p.id,title:p.title,price:p.price,originalPrice:(p.price*1.3).toFixed(2),savings:(p.price*0.3).toFixed(2),retailer:'Fake Store API',category:p.category,image:p.image,rating:p.rating}));},[apiData]);const filtered=useMemo(()=>{const t=debounced.toLowerCase().trim();return t?deals.filter(({title,category})=>title.toLowerCase().includes(t)||category.toLowerCase().includes(t)):deals;},[deals,debounced]);
+
     if(loading)return(<><section className="hero"><h1>Find the Best Deals</h1><p>Loading...</p></section><section className="deals"><h2>Featured Deals</h2><div className="deals-grid">{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(i=><Skeleton key={i}/>)}</div></section></>);
     if(error)return(<div className="error-msg"><h2>❌ Error</h2><p>{error}</p><button onClick={()=>window.location.reload()}>Retry</button></div>);
     return(<><section className="hero"><h1>Find the Best Deals</h1><p>Live from Fake Store API!</p><form onSubmit={e=>e.preventDefault()}><input type="search" value={term} onChange={e=>setTerm(e.target.value)} placeholder="Search..."/><button type="submit">Search</button></form><p className="api-status"><span className="api-live"></span>{deals.length} products</p></section><section className="stats-bar"><div className="stats-inner"><div className="stat-item"><div className="stat-number">{deals.length}</div><div className="stat-label">Products</div></div><div className="stat-item"><div className="stat-number">{deals.filter(d=>d.price<50).length}</div><div className="stat-label">Under $50</div></div><div className="stat-item"><div className="stat-number">{new Set(deals.map(d=>d.category)).size}</div><div className="stat-label">Categories</div></div><div className="stat-item"><div className="stat-number">${(deals.reduce((s,d)=>s+d.price,0)/deals.length).toFixed(0)}</div><div className="stat-label">Avg Price</div></div></div></section><section className="deals" id="deals"><h2>Featured Deals ({filtered.length})</h2><div className="deals-grid">{filtered.map(d=><DealCard key={d.id} deal={d}/>)}</div></section><section className="categories" id="categories"><h2>Browse by Category</h2><ul>{Array.from(new Set(deals.map(d=>d.category))).map(c=><li key={c}><a href="#" onClick={e=>{e.preventDefault();setTerm(c);}}>{c}</a></li>)}</ul></section></>);}
 
     function DealPage(){const{id}=useParams();const nav=useNavigate();const{state,dispatch}=useApp();const{data:p,loading,error}=useFetch(`${API_BASE}/products/${id}`);if(loading)return<div className="loading">🔄 Loading...</div>;if(error||!p)return<div className="not-found"><h1>404</h1><button onClick={()=>navigate('/')}>Go Home</button></div>;const isFav=state.favorites.includes(p.id);const inCart=state.cart.find(i=>i.id===p.id);const deal={id:p.id,title:p.title,price:p.price,originalPrice:(p.price*1.3).toFixed(2),savings:(p.price*0.3).toFixed(2),retailer:'Fake Store API',category:p.category,image:p.image,rating:p.rating};return(<section className="page-about" style={{maxWidth:'600px'}}><img src={p.image} alt={p.title} style={{width:'100%',height:'300px',objectFit:'contain',background:'#fff',padding:'1rem',marginBottom:'2rem'}}/><h1>{p.title}</h1><p style={{fontSize:'0.85rem',color:'#64748b',textTransform:'capitalize'}}>{p.category}</p><p style={{fontSize:'1.5rem',color:'#16a34a',fontWeight:700,marginTop:'1rem'}}>${p.price.toFixed(2)}</p><p style={{marginTop:'1rem'}}>{p.description||'No description'}</p><p style={{marginTop:'1rem'}}>⭐️ {p.rating?.rate||'N/A'} ({p.rating?.count||0})</p><div style={{marginTop:'2rem',display:'flex',gap:'1rem',justifyContent:'center',flexWrap:'wrap'}}><button className="add-cart-btn" onClick={()=>dispatch({type:isFav?'REM_FAV':'ADD_FAV',payload:p.id})} style={{padding:'0.75rem 1.5rem'}}>{isFav?'❤️ Saved':'🤍 Save'}</button><button className={`add-cart-btn ${inCart?'added':''}`} onClick={()=>dispatch({type:'ADD_CART',payload:deal})} disabled={!!inCart} style={{padding:'0.75rem 1.5rem'}}>{inCart?'✓ In Cart':'+ Cart'}</button><button onClick={()=>navigate('/')} style={{padding:'0.75rem 1.5rem',background:'#f1f5f9',border:'2px solid #e2e8f0',borderRadius:'10px',fontWeight:600,cursor:'pointer'}}>← Back</button></div></section>);}
-
+    
     function CategoriesPage(){const[sel,setSel]=useState('');const{data:apiData,loading}=useFetch(`${API_BASE}/products`);const cats=useMemo(()=>apiData?[...new Set(apiData.map(p=>p.category))]:[],[apiData]);const filtered=useMemo(()=>apiData?sel?apiData.filter(p=>p.category===sel):apiData:[],[apiData,sel]);if(loading)return<div className="loading">🔄 Loading...</div>;return(<><section className="categories"><h2>Browse by Category</h2><ul><li><a href="#" className={!sel?'active':''} onClick={e=>{e.preventDefault();setSel('');}}>All</a></li>{cats.map(c=><li key={c}><a href="#" className={sel===c?'active':''} onClick={e=>{e.preventDefault();setSel(c);}}>{c}</a></li>)}</ul></section><section className="deals"><h2>{sel?`${filtered.length} products`:'All'}</h2><div className="deals-grid">{filtered.map(d=><DealCard key={d.id} deal={d}/>)}</div></section></>);}
 
-    function LoginPage(){const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[error,setError]=useState('');const nav=useNavigate();const handleSubmit=async(e)=>{e.preventDefault();setError('');try{const res=await fetch(`${API_BASE}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});const data=await res.json();if(!res.ok)throw new Error(data.error);localStorage.setItem('token',data.token);localStorage.setItem('user',JSON.stringify(data.user));nav('/');}catch(err){setError(err.message||'Login failed. Using demo mode.');}};return(<section className="auth-page"><h1>Login</h1>{error&&<div className="auth-error">{error}</div>}<form className="auth-form" onSubmit={handleSubmit}><label>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" required/><label>Password</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required/><button type="submit">Login</button></form><p style={{textAlign:'center',marginTop:'1rem',color:'#64748b',fontSize:'0.9rem'}}>No account? <Link to="/register">Register</Link></p></section>);}
-
-    function RegisterPage(){const[name,setName]=useState('');const[email,setEmail]=useState('');const[password,setPassword]=useState('');const[error,setError]=useState('');const nav=useNavigate();const handleSubmit=async(e)=>{e.preventDefault();setError('');try{const res=await fetch(`${API_BASE}/api/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,password})});const data=await res.json();if(!res.ok)throw new Error(data.error);localStorage.setItem('token',data.token);localStorage.setItem('user',JSON.stringify(data.user));nav('/');}catch(err){setError(err.message||'Register failed. Using demo mode.');}};return(<section className="auth-page"><h1>Register</h1>{error&&<div className="auth-error">{error}</div>}<form className="auth-form" onSubmit={handleSubmit}><label>Name</label><input type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Your name" required/><label>Email</label><input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com" required/><label>Password</label><input type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="••••••••" required/><button type="submit">Create Account</button></form><p style={{textAlign:'center',marginTop:'1rem',color:'#64748b',fontSize:'0.9rem'}}>Have an account? <Link to="/login">Login</Link></p></section>);}
-
-    function AboutPage(){return(<section className="page-about"><h1>About DealBuddy</h1><p>Full-stack DealBuddy with authentication. React + Express + JWT.</p><p>Built by <strong>Christopher Owolabi</strong>.</p><h2 style={{marginTop:'2rem',marginBottom:'1rem',color:'#1e293b'}}>Tech Stack</h2><div className="tech-grid"><div className="tech-item">⚛️ React</div><div className="tech-item">🖥️ Node.js</div><div className="tech-item">🚂 Express</div><div className="tech-item">🔐 JWT Auth</div><div className="tech-item">🔗 Context API</div><div className="tech-item">🌍 Fetch API</div><div className="tech-item">💾 LocalStorage</div><div className="tech-item">🚀 Netlify</div></div></section>);}
+    function AboutPage(){return(<section className="page-about"><h1>About DealBuddy</h1><p>Full-stack DealBuddy: React + Express + JWT auth.</p><p>Built by <strong>Christopher Owolabi</strong>.</p><h2 style={{marginTop:'2rem',marginBottom:'1rem',color:'#1e293b'}}>Tech Stack</h2><div className="tech-grid"><div className="tech-item">⚛️ React</div><div className="tech-item">🖥️ Node.js</div><div className="tech-item">🚂 Express</div><div className="tech-item">🔐 JWT Auth</div><div className="tech-item">🔗 Context API</div><div className="tech-item">🌍 Fetch API</div><div className="tech-item">💾 LocalStorage</div><div className="tech-item">🚀 GitHub Pages</div></div></section>);}
 
     function ContactPage(){const[form,setForm]=useState({name:'',email:'',message:''});const[sent,setSent]=useState(false);return(<section className="page-contact"><h1>Get In Touch</h1><p>Have a question? Drop me a message!</p>{sent?<div className="contact-success">✅ Sent!</div>:<form className="contact-form" onSubmit={e=>{e.preventDefault();setSent(true);setForm({name:'',email:'',message:''});}}><label>Name</label><input type="text" name="name" value={form.name} onChange={e=>setForm(p=>({...p,[e.target.name]:e.target.value}))} required/><label>Email</label><input type="email" name="email" value={form.email} onChange={e=>setForm(p=>({...p,[e.target.name]:e.target.value}))} required/><label>Message</label><textarea name="message" value={form.message} onChange={e=>setForm(p=>({...p,[e.target.name]:e.target.value}))} rows="5" required/><button type="submit">Send →</button></form>}</section>);}
 
     function NotFoundPage(){return<div className="not-found"><h1>404</h1><p>Not found.</p><Link to="/">← Home</Link></div>;}
 
-    function App(){return(<AppProvider><BrowserRouter><Layout><Routes><Route path="/" element={<HomePage/>}/><Route path="/deal/:id" element={<DealPage/>}/><Route path="/categories" element={<CategoriesPage/>}/><Route path="/login" element={<LoginPage/>}/><Route path="/register" element={<RegisterPage/>}/><Route path="/about" element={<AboutPage/>}/><Route path="/contact" element={<ContactPage/>}/><Route path="" element={<NotFoundPage/>}/></Routes></Layout></BrowserRouter></AppProvider>);}
+    function App(){return(<AppProvider><HashRouter><Layout><Routes><Route path="/" element={<HomePage/>}/><Route path="/deal/:id" element={<DealPage/>}/><Route path="/categories" element={<CategoriesPage/>}/><Route path="/about" element={<AboutPage/>}/><Route path="/contact" element={<ContactPage/>}/><Route path="*" element={<NotFoundPage/>}/></Routes></Layout></HashRouter></AppProvider>);}
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App/>);
