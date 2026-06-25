@@ -7,16 +7,15 @@
   <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.development.js" crossorigin></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
-    a{text-decoration:none;color:#2563eb}
+    a{text-decoration:none;color:#2563eb;cursor:pointer}
     img{max-width:100%;height:auto;border-radius:8px}
     .header{background:linear-gradient(135deg,#1e293b,#334155);padding:1rem 2rem;position:sticky;top:0;z-index:100}
     .header nav{display:flex;align-items:center;gap:1.5rem;max-width:1200px;margin:0 auto;flex-wrap:wrap}
     .header nav a{color:#e2e8f0;font-weight:500}.header nav a:hover{color:#fff}
-    .header nav a:first-child{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .header nav .logo{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .header-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
     .badge-count{padding:0.25rem 0.625rem;border-radius:50px;font-size:0.8rem;font-weight:700}
     .fav-badge{background:#ef4444;color:#fff}.cart-badge{background:#16a34a;color:#fff;cursor:pointer}
@@ -36,11 +35,11 @@
     .deals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
     .deal-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:transform 0.3s}
     .deal-card:hover{transform:translateY(-8px);box-shadow:0 12px 40px rgba(0,0,0,0.15)}.deal-card:hover img{transform:scale(1.05)}
-    .deal-card img{width:100%;height:200px;object-fit:cover;transition:transform 0.3s}
+.deal-card img{width:100%;height:200px;object-fit:cover;transition:transform 0.3s}
     .deal-card-body{padding:1.25rem}.deal-card h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
     .deal-card .price{font-size:1.1rem}.deal-card .price strong{color:#1e293b}.deal-card .price s{color:#999;margin-left:0.5rem}
     .deal-card .savings{color:#16a34a;font-weight:600;margin-top:0.25rem}.deal-card .retailer{color:#64748b;font-size:0.85rem;margin-top:0.25rem}
-    .deal-card-actions{display:flex;gap:0.75rem;margin-top:1rem;align-items:center}.deal-card-actions a{font-weight:600;color:#667eea;font-size:0.9rem}
+    .deal-card-actions{display:flex;gap:0.75rem;margin-top:1rem;align-items:center}
     .card-badge{position:absolute;top:0.5rem;left:0.5rem;background:#fff;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:700;color:#667eea}
     .fav-btn{position:absolute;top:0.5rem;right:0.5rem;background:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
     .add-cart-btn{padding:0.5rem 1rem;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;transition:all 0.2s;color:#475569}.add-cart-btn.added{background:#dcfce7;border-color:#16a34a;color:#16a34a}
@@ -48,118 +47,292 @@
     .categories ul{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem}
     .categories li a{display:inline-block;padding:0.75rem 1.5rem;background:#fff;border:2px solid #e2e8f0;border-radius:50px;font-weight:600;color:#475569;transition:all 0.3s}
     .categories li a:hover,.categories li a.active{border-color:#667eea;color:#667eea;transform:translateY(-2px)}
-    .newsletter{background:linear-gradient(135deg,#667eea,#764ba2);padding:4rem 2rem;text-align:center;color:#fff}
-    .newsletter h2{font-size:1.75rem;margin-bottom:1rem}.newsletter p{opacity:0.8;margin-bottom:2rem}
-    .newsletter form{display:flex;flex-direction:column;gap:0.75rem;max-width:450px;margin:0 auto}
-    .newsletter input{padding:1rem 1.5rem;border:2px solid rgba(255,255,255,0.3);border-radius:12px;font-size:1rem;width:100%;background:rgba(255,255,255,0.15);color:#fff}
-    .newsletter input::placeholder{color:rgba(255,255,255,0.6)}.newsletter input:focus{outline:none;border-color:#f59e0b}
-    .newsletter button{padding:1rem 2rem;background:linear-gradient(135deg,#f59e0b,#f97316);color:#1e293b;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}
-    .cart-drawer{position:fixed;top:0;right:0;width:350px;max-width:90vw;height:100vh;background:#fff;box-shadow:-4px 0 30px rgba(0,0,0,0.15);z-index:200;padding:2rem;overflow-y:auto;animation:slideLeft 0.3s}
-    @keyframes slideLeft{from{transform:translateX(100%)}to{transform:translateX(0)}}
-    .cart-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:199}
-    .cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}.cart-close{background:none;border:none;font-size:1.5rem;cursor:pointer}
-    .cart-item{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid #e2e8f0;align-items:center}.cart-item img{width:60px;height:60px;object-fit:cover;border-radius:8px}
-    .cart-item-info{flex:1}.cart-item-title{font-weight:600;font-size:0.9rem}.cart-item-price{color:#16a34a;font-weight:700}
-    .cart-empty{text-align:center;padding:3rem 1rem;color:#64748b}.cart-total{font-size:1.25rem;font-weight:700;margin-top:1.5rem;padding-top:1rem;border-top:2px solid #e2e8f0}
-    .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}.skeleton-card{height:320px}
-    .page-about,.page-contact{padding:4rem 2rem;max-width:800px;margin:0 auto}.page-about h1,.page-contact h1{font-size:2rem;margin-bottom:1.5rem}
-    .page-about p{color:#64748b;margin-bottom:1.5rem;line-height:1.8}
+    .page{padding:4rem 2rem;max-width:800px;margin:0 auto}.page h1{font-size:2rem;margin-bottom:1.5rem}
+    .page p{color:#64748b;margin-bottom:1.5rem;line-height:1.8}
     .tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-top:2rem}
     .tech-item{background:#fff;padding:1.5rem;border-radius:12px;text-align:center;font-weight:600;color:#667eea;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-    .contact-form{display:flex;flex-direction:column;gap:1rem;max-width:500px;margin:0 auto}.contact-form label{font-weight:600}
-    .contact-form input,.contact-form textarea{padding:0.875rem 1.25rem;border:2px solid #e2e8f0;border-radius:10px;font-size:1rem}.contact-form input:focus,.contact-form textarea:focus{outline:none;border-color:#667eea}
-    .contact-form button{padding:1rem 2rem;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}
-    .contact-success{background:#dcfce7;color:#166534;padding:1.5rem;border-radius:12px;margin-top:1rem}
+    .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}.skeleton-card{height:320px}
     .footer{background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;padding:3rem 2rem;text-align:center;margin-top:4rem}.footer p{opacity:0.6;font-size:0.875rem}
-    .not-found{text-align:center;padding:6rem 2rem}.not-found h1{font-size:4rem;color:#667eea;margin-bottom:1rem}
-    .loading{text-align:center;padding:3rem;color:#666}.no-results{text-align:center;color:#666;padding:2rem}
-    .error-msg{text-align:center;padding:3rem;color:#dc2626}
-    @media(min-width:768px){.hero form{flex-direction:row}.hero input{flex:1;width:auto}.hero button{width:auto}.newsletter form{flex-direction:row}.newsletter input{flex:1;width:auto}}
+    .loading{text-align:center;padding:3rem;color:#666}
+    @media(min-width:768px){.hero form{flex-direction:row}.hero input{flex:1;width:auto}.hero button{width:auto}}
   </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="text/babel">
-    const { useState, useEffect, useMemo, useContext, createContext, useReducer } = React;
-    const { HashRouter, Routes, Route, Link, useParams, useNavigate } = ReactRouterDOM;
+    const { useState, useEffect, useMemo } = React;
+
     const API_BASE = 'https://fakestoreapi.com';
 
-    const getInitial = () => { try { const s=localStorage.getItem('db_state'); if(s) return JSON.parse(s); } catch{} return {favorites:[],cart:[],toast:null}; };
-    function reducer(state, action) {
-      let n;
-      switch(action.type) {
-        case 'ADD_FAV': n={...state,favorites:[...state.favorites,action.payload],toast:'❤️ Added!'}; break;
-        case 'REM_FAV': n={...state,favorites:state.favorites.filter(id=>id!==action.payload),toast:'💔 Removed'}; break;
-        case 'ADD_CART': state.cart.find(i=>i.id===action.payload.id)?n={...state,toast:'Already in cart!'}:n={...state,cart:[...state.cart,action.payload],toast:`🛒 ${action.payload.title} added!`}; break;
-        case 'REM_CART': n={...state,cart:state.cart.filter(i=>i.id!==action.payload),toast:'Removed'}; break;
-        case 'CLEAR_CART': n={...state,cart:[],toast:'Cart cleared'}; break;
-        case 'TOAST': n={...state,toast:action.payload}; break;
-        case 'CLEAR_TOAST': n={...state,toast:null}; break;
-        default: return state;
-      }
-      localStorage.setItem('db_state',JSON.stringify(n));
-      return n;
-    }
-    const AppCtx = createContext();
-    function AppProvider({children}) {
-      const [state,dispatch] = useReducer(reducer,null,getInitial);
-      useEffect(()=>{if(state.toast){const t=setTimeout(()=>dispatch({type:'CLEAR_TOAST'}),3000);return()=>clearTimeout(t);}},[state.toast]);
-      return <AppCtx.Provider value={{state,dispatch}}>{children}</AppCtx.Provider>;
-    }
-    function useApp(){ return useContext(AppCtx); }
+    function App() {
+      const [page, setPage] = useState('home');
+      const [term, setTerm] = useState('');
+      const [selCategory, setSelCategory] = useState('');
+      const [favorites, setFavorites] = useState(() => { try { return JSON.parse(localStorage.getItem('favs')) || []; } catch { return []; } });
+      const [cart, setCart] = useState(() => { try { return JSON.parse(localStorage.getItem('cart')) || []; } catch { return []; } });
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [toast, setToast] = useState(null);
 
-    function Skeleton(){return <div className="deal-card"><div className="skeleton skeleton-card"></div></div>;}
-    function Toast(){const{state}=useApp();return state.toast?<div className="toast">{state.toast}</div>:null;}
+      useEffect(() => {
+        document.title = 'DealBuddy';
+        fetch(`${API_BASE}/products`)
+          .then(r => r.json())
+          .then(d => { setData(d); setLoading(false); })
+          .catch(e => { setError(e.message); setLoading(false); });
+      }, []);
 
-    function Header({onCartClick}) {
-      const {state} = useApp();
-      return (
-        <header className="header">
-          <nav>
-            <Link to="/"><strong>DealBuddy</strong></Link>
-            <Link to="/">Deals</Link>
-            <Link to="/categories">Categories</Link>
-            <Link to="/about">About</Link>
-            <div className="header-right">
-              {state.favorites.length>0&&<span className="badge-count fav-badge">❤️ {state.favorites.length}</span>}
-              {state.cart.length>0&&<span className="badge-count cart-badge" onClick={onCartClick}>🛒 {state.cart.length}</span>}
+      useEffect(() => { localStorage.setItem('favs', JSON.stringify(favorites)); }, [favorites]);
+      useEffect(() => { localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
+const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+
+      const toggleFav = (id) => {
+        setFavorites(f => f.includes(id) ? f.filter(x => x !== id) : [...f, id]);
+        showToast(favorites.includes(id) ? '💔 Removed' : '❤️ Added!');
+      };
+
+      const addToCart = (item) => {
+        if (cart.find(i => i.id === item.id)) { showToast('Already in cart!'); return; }
+        setCart(c => [...c, item]);
+        showToast(`🛒 ${item.title} added!`);
+      };
+
+      const removeFromCart = (id) => { setCart(c => c.filter(i => i.id !== id)); showToast('Removed'); };
+      const clearCart = () => { setCart([]); showToast('Cart cleared'); };
+
+      const deals = useMemo(() => {
+        if (!data) return [];
+        return data.map(p => ({
+          id: p.id, title: p.title, price: p.price,
+          originalPrice: (p.price * 1.3).toFixed(2),
+          savings: (p.price * 0.3).toFixed(2),
+          retailer: 'Fake Store API', category: p.category,
+          image: p.image, rating: p.rating
+        }));
+      }, [data]);
+
+      const filtered = useMemo(() => {
+        let result = deals;
+        if (selCategory) result = result.filter(d => d.category === selCategory);
+        if (term) { const t = term.toLowerCase(); result = result.filter(d => d.title.toLowerCase().includes(t) || d.category.toLowerCase().includes(t)); }
+        return result;
+      }, [deals, selCategory, term]);
+
+      const categories = useMemo(() => [...new Set(deals.map(d => d.category))], [deals]);
+      const cartTotal = cart.reduce((s, i) => s + i.price, 0).toFixed(2);
+      const avgPrice = deals.length ? (deals.reduce((s, d) => s + d.price, 0) / deals.length).toFixed(0) : 0;
+
+      const NavLink = (props) => (
+        <a style={{ color: page === props.to ? '#fff' : '#e2e8f0', fontWeight: page === props.to ? 700 : 500 }}
+           onClick={(e) => { e.preventDefault(); setPage(props.to); window.scrollTo(0, 0); }}>
+          {props.children}
+        </a>
+      );
+
+      const DealCard = ({ deal }) => (
+        <article className="deal-card">
+          <div style={{ position: 'relative' }}>
+            <img src={deal.image} alt={deal.title} loading="lazy" />
+            <span className="card-badge">{deal.category}</span>
+            <button className="fav-btn" onClick={() => toggleFav(deal.id)}>
+              {favorites.includes(deal.id) ? '❤️' : '🤍'}
+            </button>
+          </div>
+          <div className="deal-card-body">
+            <h3>{deal.title}</h3>
+            <p className="price"><strong>${deal.price.toFixed(2)}</strong> <s>${deal.originalPrice}</s></p>
+            <p className="savings">Save ${deal.savings} at {deal.retailer}</p>
+            <div className="deal-card-actions">
+              <a onClick={(e) => { e.preventDefault(); setPage('deal-' + deal.id); window.scrollTo(0, 0); }} style={{ cursor: 'pointer', fontWeight: 600, color: '#667eea', fontSize: '0.9rem' }}>View Deal →</a>
+              <button className={'add-cart-btn' + (cart.find(i => i.id === deal.id) ? ' added' : '')} onClick={() => addToCart(deal)} disabled={!!cart.find(i => i.id === deal.id)}>
+                {cart.find(i => i.id === deal.id) ? '✓ Added' : '+ Cart'}
+              </button>
             </div>
-          </nav>
-        </header>
+          </div>
+        </article>
+      );
+
+      const Skeleton = () => <div className="deal-card"><div className="skeleton skeleton-card"></div></div>;
+
+      const HomePage = () => (
+        <>
+          <section className="hero">
+            <h1>Find the Best Deals Near You</h1>
+            <p>Live products from Fake Store API!</p>
+            <form onSubmit={e => e.preventDefault()}>
+              <input type="search" value={term} onChange={e => setTerm(e.target.value)} placeholder="Search products..." />
+              <button type="submit">Search</button>
+            </form>
+            <p className="api-status"><span className="api-live"></span>{deals.length} products loaded</p>
+          </section>
+          <section className="stats-bar">
+            <div className="stats-inner">
+<div className="stat-item"><div className="stat-number">{deals.length}</div><div className="stat-label">Products</div></div>
+              <div className="stat-item"><div className="stat-number">{deals.filter(d => d.price < 50).length}</div><div className="stat-label">Under $50</div></div>
+              <div className="stat-item"><div className="stat-number">{categories.length}</div><div className="stat-label">Categories</div></div>
+              <div className="stat-item"><div className="stat-number">${avgPrice}</div><div className="stat-label">Avg Price</div></div>
+            </div>
+          </section>
+          <section className="deals" id="deals">
+            <h2>Featured Deals ({filtered.length})</h2>
+            {loading ? (
+              <div className="deals-grid">{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(i => <Skeleton key={i} />)}</div>
+            ) : error ? (
+              <div style={{ textAlign: 'center', padding: '3rem', color: '#dc2626' }}>
+                <h2>❌ Error</h2><p>{error}</p>
+                <button onClick={() => window.location.reload()} style={{ marginTop: '1rem', padding: '0.75rem 1.5rem', background: '#667eea', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' }}>Retry</button>
+              </div>
+            ) : (
+              <div className="deals-grid">{filtered.map(d => <DealCard key={d.id} deal={d} />)}</div>
+            )}
+          </section>
+          <section className="categories" id="categories">
+            <h2>Browse by Category</h2>
+            <ul>
+              <li><a className={!selCategory ? 'active' : ''} onClick={() => setSelCategory('')}>All</a></li>
+              {categories.map(c => <li key={c}><a className={selCategory === c ? 'active' : ''} onClick={() => setSelCategory(c)}>{c}</a></li>)}
+            </ul>
+          </section>
+        </>
+      );
+
+      const DealPage = ({ id }) => {
+        const [product, setProduct] = useState(null);
+        const [pl, setPl] = useState(true);
+        useEffect(() => {
+          fetch(`${API_BASE}/products/${id}`).then(r => r.json()).then(d => { setProduct(d); setPl(false); }).catch(() => setPl(false));
+        }, [id]);
+        if (pl) return <div className="loading">🔄 Loading...</div>;
+        if (!product) return <div className="page"><h1>404</h1><p>Product not found.</p></div>;
+        const isFav = favorites.includes(product.id);
+        const inCart = cart.find(i => i.id === product.id);
+        const deal = { id: product.id, title: product.title, price: product.price, originalPrice: (product.price * 1.3).toFixed(2), savings: (product.price * 0.3).toFixed(2), retailer: 'Fake Store API', category: product.category, image: product.image, rating: product.rating };
+        return (
+          <section className="page" style={{ maxWidth: '600px' }}>
+            <img src={product.image} alt={product.title} style={{ width: '100%', height: '300px', objectFit: 'contain', background: '#fff', padding: '1rem', marginBottom: '2rem', borderRadius: '8px' }} />
+            <h1>{product.title}</h1>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', textTransform: 'capitalize' }}>{product.category}</p>
+            <p style={{ fontSize: '1.5rem', color: '#16a34a', fontWeight: 700, marginTop: '1rem' }}>${product.price.toFixed(2)}</p>
+            <p style={{ marginTop: '1rem', color: '#64748b' }}>{product.description}</p>
+            <p style={{ marginTop: '1rem' }}>⭐️ {product.rating?.rate || 'N/A'} ({product.rating?.count || 0} reviews)</p>
+            <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button className="add-cart-btn" onClick={() => toggleFav(product.id)} style={{ padding: '0.75rem 1.5rem' }}>{isFav ? '❤️ Saved' : '🤍 Save'}</button>
+              <button className={'add-cart-btn' + (inCart ? ' added' : '')} onClick={() => addToCart(deal)} disabled={!!inCart} style={{ padding: '0.75rem 1.5rem' }}>{inCart ? '✓ In Cart' : '+ Add to Cart'}</button>
+<button onClick={() => setPage('home')} style={{ padding: '0.75rem 1.5rem', background: '#f1f5f9', border: '2px solid #e2e8f0', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' }}>← Back</button>
+            </div>
+          </section>
+        );
+      };
+
+      const AboutPage = () => (
+        <section className="page">
+          <h1>About DealBuddy</h1>
+          <p>DealBuddy is a full-stack deal-discovery platform built with React, modern JavaScript, and responsive design.</p>
+          <p>Built by <strong>Christopher Owolabi</strong> as part of a 30-day full-stack web development learning path.</p>
+          <h2 style={{ marginTop: '2rem', marginBottom: '1rem', color: '#1e293b' }}>Tech Stack</h2>
+          <div className="tech-grid">
+            <div className="tech-item">⚛️ React</div><div className="tech-item">🖥️ Node.js</div>
+            <div className="tech-item">🚂 Express</div><div className="tech-item">🔐 JWT Auth</div>
+            <div className="tech-item">🔗 Context API</div><div className="tech-item">🌍 Fetch API</div>
+            <div className="tech-item">💾 LocalStorage</div><div className="tech-item">🚀 GitHub Pages</div>
+          </div>
+        </section>
+      );
+
+      const ContactPage = () => {
+        const [form, setForm] = useState({ name: '', email: '', message: '' });
+        const [sent, setSent] = useState(false);
+        return (
+          <section className="page">
+            <h1>Get In Touch</h1>
+            <p>Have a question or want to collaborate? Drop me a message!</p>
+            {sent ? <div style={{ background: '#dcfce7', color: '#166534', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' }}>✅ Message sent!</div> : (
+              <form onSubmit={e => { e.preventDefault(); setSent(true); setForm({ name: '', email: '', message: '' }); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '500px', marginTop: '1rem' }}>
+                <label style={{ fontWeight: 600 }}>Name</label>
+                <input type="text" value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} required style={{ padding: '0.875rem 1.25rem', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '1rem' }} />
+                <label style={{ fontWeight: 600 }}>Email</label>
+                <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required style={{ padding: '0.875rem 1.25rem', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '1rem' }} />
+                <label style={{ fontWeight: 600 }}>Message</label>
+                <textarea value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} rows="5" required style={{ padding: '0.875rem 1.25rem', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '1rem' }} />
+                <button type="submit" style={{ padding: '1rem 2rem', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' }}>Send →</button>
+              </form>
+            )}
+          </section>
+        );
+      };
+
+      const CartDrawer = () => {
+        const [open, setOpen] = useState(false);
+        if (!open) return (
+          <div className="cart-drawer" style={{ padding: '1rem', textAlign: 'center' }}>
+            <p style={{ color: '#64748b' }}>Cart is empty</p>
+          </div>
+        );
+        return (
+          <>
+            <div className="cart-overlay" onClick={() => setOpen(false)}></div>
+            <div className="cart-drawer">
+              <div className="cart-header">
+                <h3>🛒 Cart ({cart.length})</h3>
+                <button className="cart-close" onClick={() => setOpen(false)}>✕</button>
+              </div>
+              {cart.map(i => (
+                <div key={i.id} className="cart-item">
+                  <img src={i.image} alt={i.title} />
+                  <div className="cart-item-info">
+<div className="cart-item-title">{i.title}</div>
+                    <div className="cart-item-price">${i.price.toFixed(2)}</div>
+                  </div>
+                  <button onClick={() => removeFromCart(i.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem' }}>✕</button>
+                </div>
+              ))}
+              <div className="cart-total">
+                Total: ${cartTotal}
+                <button onClick={clearCart} style={{ float: 'right', padding: '0.25rem 0.75rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}>Clear</button>
+              </div>
+            </div>
+          </>
+        );
+      };
+
+      // Parse page from deal-{id}
+      const dealMatch = page.match(/^deal-(\d+)$/);
+      const dealId = dealMatch ? parseInt(dealMatch[1]) : null;
+
+      return (
+        <>
+          <header className="header">
+            <nav>
+              <a className="logo" onClick={() => setPage('home')} style={{ cursor: 'pointer' }}>DealBuddy</a>
+              <NavLink to="home">Deals</NavLink>
+              <NavLink to="categories">Categories</NavLink>
+              <NavLink to="about">About</NavLink>
+              <NavLink to="contact">Contact</NavLink>
+              <div className="header-right">
+                {favorites.length > 0 && <span className="badge-count fav-badge">❤️ {favorites.length}</span>}
+                <span className="badge-count cart-badge" onClick={() => setPage('cart')}>🛒 {cart.length}</span>
+              </div>
+            </nav>
+          </header>
+          <main>
+            {page === 'home' && <HomePage />}
+            {page === 'categories' && <HomePage />}
+            {page === 'about' && <AboutPage />}
+            {page === 'contact' && <ContactPage />}
+            {page === 'cart' && <CartDrawer />}
+            {dealId && <DealPage id={dealId} />}
+          </main>
+          <footer className="footer"><p>© 2026 Owolabi Onaope Christopher</p></footer>
+          {toast && <div className="toast">{toast}</div>}
+        </>
       );
     }
 
-    function CartDrawer({isOpen,onClose}){const{state,dispatch}=useApp();if(!isOpen)return null;const total=state.cart.reduce((s,i)=>s+i.price,0);return(<><div className="cart-overlay" onClick={onClose}></div><div className="cart-drawer"><div className="cart-header"><h3>🛒 Cart ({state.cart.length})</h3><button className="cart-close" onClick={onClose}>✕</button></div>{state.cart.length===0?<div className="cart-empty">Empty</div>:<>{state.cart.map(i=><div key={i.id} className="cart-item"><img src={i.image} alt={i.title}/><div className="cart-item-info"><div className="cart-item-title">{i.title}</div><div className="cart-item-price">${i.price.toFixed(2)}</div></div><button onClick={()=>dispatch({type:'REM_CART',payload:i.id})} style={{background:'none',border:'none',cursor:'pointer',fontSize:'1.25rem'}}>✕</button></div>)}<div className="cart-total">Total: ${total.toFixed(2)}<button onClick={()=>dispatch({type:'CLEAR_CART'})} style={{float:'right',padding:'0.25rem 0.75rem',background:'#ef4444',color:'#fff',border:'none',borderRadius:'6px',cursor:'pointer',fontSize:'0.8rem'}}>Clear</button></div></>}</div></>);}
-
-    function Layout({children}){const[cartOpen,setCartOpen]=useState(false);return(<><Header onCartClick={()=>setCartOpen(true)}/><main>{children}</main><footer className="footer"><p>© 2026 Owolabi Onaope Christopher</p></footer><CartDrawer isOpen={cartOpen} onClose={()=>setCartOpen(false)}/><Toast/></>);}
-
-    function DealCard({deal}){const{state,dispatch}=useApp();const isFav=state.favorites.includes(deal.id);const inCart=state.cart.find(i=>i.id===deal.id);return(<article className="deal-card"><div style={{position:'relative'}}><img src={deal.image} alt={deal.title} loading="lazy"/><span className="card-badge">{deal.category}</span><button className="fav-btn" onClick={()=>dispatch({type:isFav?'REM_FAV':'ADD_FAV',payload:deal.id})}>{isFav?'❤️':'🤍'}</button></div><div className="deal-card-body"><h3>{deal.title}</h3><p className="price"><strong>${deal.price.toFixed(2)}</strong></p><p className="retailer">⭐️ {deal.rating?.rate||'4.5'} • {deal.rating?.count||'100'} reviews</p><div className="deal-card-actions"><Link to={`/deal/${deal.id}`}>View Deal →</Link><button className={`add-cart-btn ${inCart?'added':''}`} onClick={()=>dispatch({type:'ADD_CART',payload:deal})} disabled={!!inCart}>{inCart?'✓ Added':'+ Cart'}</button></div></div></article>);}
-
-    function useFetch(url){const[data,setData]=useState(null);const[loading,setLoading]=useState(true);const[error,setError]=useState(null);useEffect(()=>{const ctrl=new AbortController();(async()=>{setLoading(true);setError(null);try{const r=await fetch(url,{signal:ctrl.signal});if(!r.ok)throw new Error(`HTTP ${r.status}`);setData(await r.json());}catch(e){if(e.name!=='AbortError')setError(e.message);}finally{setLoading(false);}})();return()=>ctrl.abort();},[url]);return{data,loading,error};}
-
-    function useDebounce(val,delay){const[dv,setDv]=useState(val);useEffect(()=>{const t=setTimeout(()=>setDv(val),delay);return()=>clearTimeout(t);},[val,delay]);return dv;}
-
-    function HomePage(){const[term,setTerm]=useState('');const{data:apiData,loading,error}=useFetch(`${API_BASE}/products`);const debounced=useDebounce(term,300);const deals=useMemo(()=>{if(!apiData)return[];return apiData.map(p=>({id:p.id,title:p.title,price:p.price,originalPrice:(p.price*1.3).toFixed(2),savings:(p.price*0.3).toFixed(2),retailer:'Fake Store API',category:p.category,image:p.image,rating:p.rating}));},[apiData]);const filtered=useMemo(()=>{const t=debounced.toLowerCase().trim();return t?deals.filter(({title,category})=>title.toLowerCase().includes(t)||category.toLowerCase().includes(t)):deals;},[deals,debounced]);
-
-    if(loading)return(<><section className="hero"><h1>Find the Best Deals</h1><p>Loading...</p></section><section className="deals"><h2>Featured Deals</h2><div className="deals-grid">{[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(i=><Skeleton key={i}/>)}</div></section></>);
-    if(error)return(<div className="error-msg"><h2>❌ Error</h2><p>{error}</p><button onClick={()=>window.location.reload()}>Retry</button></div>);
-    return(<><section className="hero"><h1>Find the Best Deals</h1><p>Live from Fake Store API!</p><form onSubmit={e=>e.preventDefault()}><input type="search" value={term} onChange={e=>setTerm(e.target.value)} placeholder="Search..."/><button type="submit">Search</button></form><p className="api-status"><span className="api-live"></span>{deals.length} products</p></section><section className="stats-bar"><div className="stats-inner"><div className="stat-item"><div className="stat-number">{deals.length}</div><div className="stat-label">Products</div></div><div className="stat-item"><div className="stat-number">{deals.filter(d=>d.price<50).length}</div><div className="stat-label">Under $50</div></div><div className="stat-item"><div className="stat-number">{new Set(deals.map(d=>d.category)).size}</div><div className="stat-label">Categories</div></div><div className="stat-item"><div className="stat-number">${(deals.reduce((s,d)=>s+d.price,0)/deals.length).toFixed(0)}</div><div className="stat-label">Avg Price</div></div></div></section><section className="deals" id="deals"><h2>Featured Deals ({filtered.length})</h2><div className="deals-grid">{filtered.map(d=><DealCard key={d.id} deal={d}/>)}</div></section><section className="categories" id="categories"><h2>Browse by Category</h2><ul>{Array.from(new Set(deals.map(d=>d.category))).map(c=><li key={c}><a href="#" onClick={e=>{e.preventDefault();setTerm(c);}}>{c}</a></li>)}</ul></section></>);}
-
-    function DealPage(){const{id}=useParams();const nav=useNavigate();const{state,dispatch}=useApp();const{data:p,loading,error}=useFetch(`${API_BASE}/products/${id}`);if(loading)return<div className="loading">🔄 Loading...</div>;if(error||!p)return<div className="not-found"><h1>404</h1><button onClick={()=>navigate('/')}>Go Home</button></div>;const isFav=state.favorites.includes(p.id);const inCart=state.cart.find(i=>i.id===p.id);const deal={id:p.id,title:p.title,price:p.price,originalPrice:(p.price*1.3).toFixed(2),savings:(p.price*0.3).toFixed(2),retailer:'Fake Store API',category:p.category,image:p.image,rating:p.rating};return(<section className="page-about" style={{maxWidth:'600px'}}><img src={p.image} alt={p.title} style={{width:'100%',height:'300px',objectFit:'contain',background:'#fff',padding:'1rem',marginBottom:'2rem'}}/><h1>{p.title}</h1><p style={{fontSize:'0.85rem',color:'#64748b',textTransform:'capitalize'}}>{p.category}</p><p style={{fontSize:'1.5rem',color:'#16a34a',fontWeight:700,marginTop:'1rem'}}>${p.price.toFixed(2)}</p><p style={{marginTop:'1rem'}}>{p.description||'No description'}</p><p style={{marginTop:'1rem'}}>⭐️ {p.rating?.rate||'N/A'} ({p.rating?.count||0})</p><div style={{marginTop:'2rem',display:'flex',gap:'1rem',justifyContent:'center',flexWrap:'wrap'}}><button className="add-cart-btn" onClick={()=>dispatch({type:isFav?'REM_FAV':'ADD_FAV',payload:p.id})} style={{padding:'0.75rem 1.5rem'}}>{isFav?'❤️ Saved':'🤍 Save'}</button><button className={`add-cart-btn ${inCart?'added':''}`} onClick={()=>dispatch({type:'ADD_CART',payload:deal})} disabled={!!inCart} style={{padding:'0.75rem 1.5rem'}}>{inCart?'✓ In Cart':'+ Cart'}</button><button onClick={()=>navigate('/')} style={{padding:'0.75rem 1.5rem',background:'#f1f5f9',border:'2px solid #e2e8f0',borderRadius:'10px',fontWeight:600,cursor:'pointer'}}>← Back</button></div></section>);}
-    
-    function CategoriesPage(){const[sel,setSel]=useState('');const{data:apiData,loading}=useFetch(`${API_BASE}/products`);const cats=useMemo(()=>apiData?[...new Set(apiData.map(p=>p.category))]:[],[apiData]);const filtered=useMemo(()=>apiData?sel?apiData.filter(p=>p.category===sel):apiData:[],[apiData,sel]);if(loading)return<div className="loading">🔄 Loading...</div>;return(<><section className="categories"><h2>Browse by Category</h2><ul><li><a href="#" className={!sel?'active':''} onClick={e=>{e.preventDefault();setSel('');}}>All</a></li>{cats.map(c=><li key={c}><a href="#" className={sel===c?'active':''} onClick={e=>{e.preventDefault();setSel(c);}}>{c}</a></li>)}</ul></section><section className="deals"><h2>{sel?`${filtered.length} products`:'All'}</h2><div className="deals-grid">{filtered.map(d=><DealCard key={d.id} deal={d}/>)}</div></section></>);}
-
-    function AboutPage(){return(<section className="page-about"><h1>About DealBuddy</h1><p>Full-stack DealBuddy: React + Express + JWT auth.</p><p>Built by <strong>Christopher Owolabi</strong>.</p><h2 style={{marginTop:'2rem',marginBottom:'1rem',color:'#1e293b'}}>Tech Stack</h2><div className="tech-grid"><div className="tech-item">⚛️ React</div><div className="tech-item">🖥️ Node.js</div><div className="tech-item">🚂 Express</div><div className="tech-item">🔐 JWT Auth</div><div className="tech-item">🔗 Context API</div><div className="tech-item">🌍 Fetch API</div><div className="tech-item">💾 LocalStorage</div><div className="tech-item">🚀 GitHub Pages</div></div></section>);}
-
-    function ContactPage(){const[form,setForm]=useState({name:'',email:'',message:''});const[sent,setSent]=useState(false);return(<section className="page-contact"><h1>Get In Touch</h1><p>Have a question? Drop me a message!</p>{sent?<div className="contact-success">✅ Sent!</div>:<form className="contact-form" onSubmit={e=>{e.preventDefault();setSent(true);setForm({name:'',email:'',message:''});}}><label>Name</label><input type="text" name="name" value={form.name} onChange={e=>setForm(p=>({...p,[e.target.name]:e.target.value}))} required/><label>Email</label><input type="email" name="email" value={form.email} onChange={e=>setForm(p=>({...p,[e.target.name]:e.target.value}))} required/><label>Message</label><textarea name="message" value={form.message} onChange={e=>setForm(p=>({...p,[e.target.name]:e.target.value}))} rows="5" required/><button type="submit">Send →</button></form>}</section>);}
-
-    function NotFoundPage(){return<div className="not-found"><h1>404</h1><p>Not found.</p><Link to="/">← Home</Link></div>;}
-
-    function App(){return(<AppProvider><HashRouter><Layout><Routes><Route path="/" element={<HomePage/>}/><Route path="/deal/:id" element={<DealPage/>}/><Route path="/categories" element={<CategoriesPage/>}/><Route path="/about" element={<AboutPage/>}/><Route path="/contact" element={<ContactPage/>}/><Route path="*" element={<NotFoundPage/>}/></Routes></Layout></HashRouter></AppProvider>);}
-
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App/>);
+    root.render(<App />);
   </script>
 </body>
 </html>
+
