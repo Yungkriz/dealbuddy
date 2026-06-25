@@ -151,3 +151,65 @@ app.listen(PORT, () => {
   ╚═══════════════════════════════════════╝
   `);
 });
+// ===== AUTH ROUTES (ADD BEFORE app.listen) =====
+
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
+
+const JWT_SECRET = 'your-secret-key-change-in-production';
+const users = []; // In production, use a database
+
+// Middleware to verify JWT
+function authMiddleware(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'No token provided' });
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+// Register
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'All fields required' });
+  }
+  if (users.find(u => u.email === email)) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = { id: users.length + 1, name, email, password: hashedPassword };
+  users.push(user);
+  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+  res.status(201).json({ token, user: { id: user.id, name: user.name, email: user.email } });
+});
+
+// Login
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password required' });
+  }
+  const user = users.find(u => u.email === email);
+  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '7d' });
+  res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+});
+
+// Get current user
+app.get('/api/auth/me', authMiddleware, (req, res) => {
+  res.json({ user: req.user });
+});
+
+// Newsletter (updated to use auth)
+app.post('/api/subscribe', (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: 'Email required' });
+  res.json({ message: `Subscribed ${email}! 🎉` });
+});
