@@ -23,7 +23,7 @@
     .user-badge{background:#667eea;color:#fff;padding:0.25rem 0.75rem;border-radius:50px;font-size:0.8rem}
     .toast{position:fixed;bottom:2rem;right:2rem;background:#1e293b;color:#fff;padding:1rem 1.5rem;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.2);z-index:1000;animation:slideIn 0.3s}
     @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-.hero{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,#667eea,#764ba2 50%,#f093fb);color:#fff}
+    .hero{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,#667eea,#764ba2 50%,#f093fb);color:#fff}
     .hero h1{font-size:2.5rem;margin-bottom:1rem}.hero p{font-size:1.1rem;margin-bottom:2rem;opacity:0.9}
     .hero form{display:flex;flex-direction:column;gap:0.75rem;max-width:500px;margin:0 auto}
     .hero input{padding:1rem 1.5rem;border:2px solid rgba(255,255,255,0.3);border-radius:12px;font-size:1rem;width:100%;background:rgba(255,255,255,0.15);color:#fff}
@@ -89,7 +89,7 @@
   <script type="text/babel">
     const { useState, useEffect, useMemo, useContext, createContext, useReducer } = React;
     const { BrowserRouter, Routes, Route, Link, useParams, useNavigate } = ReactRouterDOM;
-    const API_BASE = 'http://localhost:3001';
+    const API_BASE = 'https://fakestoreapi.com';
 
     const AuthCtx = createContext();
     function AuthProvider({children}) {
