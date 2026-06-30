@@ -3,318 +3,369 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DealBuddy</title>
-  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <title>DealBuddy — Find the Best Deals</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;line-height:1.6;color:#333;background:#f8f9fa}
-    a{text-decoration:none;color:#2563eb;cursor:pointer}
     img{max-width:100%;height:auto;border-radius:8px}
+    a{text-decoration:none;color:inherit}
+
+    /* Header */
     .header{background:linear-gradient(135deg,#1e293b,#334155);padding:1rem 2rem;position:sticky;top:0;z-index:100}
     .header nav{display:flex;align-items:center;gap:1.5rem;max-width:1200px;margin:0 auto;flex-wrap:wrap}
-    .header nav a{color:#e2e8f0;font-weight:500}.header nav a:hover{color:#fff}
-    .header nav .logo{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .logo{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .nav-links{display:flex;gap:1.5rem;align-items:center}
+    .nav-links a{color:#e2e8f0;font-weight:500;transition:color .2s}
+    .nav-links a:hover,.nav-links a.active{color:#fff}
     .header-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
-    .badge-count{padding:0.25rem 0.625rem;border-radius:50px;font-size:0.8rem;font-weight:700}
-    .fav-badge{background:#ef4444;color:#fff}.cart-badge{background:#16a34a;color:#fff;cursor:pointer}
-    .toast{position:fixed;bottom:2rem;right:2rem;background:#1e293b;color:#fff;padding:1rem 1.5rem;border-radius:12px;box-shadow:0 8px 25px rgba(0,0,0,0.2);z-index:1000;animation:slideIn 0.3s}
-    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .badge{background:#ef4444;color:#fff;padding:0.25rem 0.625rem;border-radius:50px;font-size:0.8rem;font-weight:700;cursor:pointer}
+    .cart-badge{background:#16a34a}
+
+    /* Hero */
     .hero{text-align:center;padding:5rem 2rem;background:linear-gradient(135deg,#667eea,#764ba2 50%,#f093fb);color:#fff}
-    .hero h1{font-size:2.5rem;margin-bottom:1rem}.hero p{font-size:1.1rem;margin-bottom:2rem;opacity:0.9}
-    .hero form{display:flex;flex-direction:column;gap:0.75rem;max-width:500px;margin:0 auto}
-    .hero input{padding:1rem 1.5rem;border:2px solid rgba(255,255,255,0.3);border-radius:12px;font-size:1rem;width:100%;background:rgba(255,255,255,0.15);color:#fff}
-    .hero input::placeholder{color:rgba(255,255,255,0.6)}.hero input:focus{outline:none;border-color:#f59e0b;background:rgba(255,255,255,0.25)}
-    .hero button{padding:1rem 2rem;background:linear-gradient(135deg,#f59e0b,#f97316);color:#1e293b;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer;width:100%}
-    .api-status{margin-top:1rem;font-size:0.85rem;opacity:0.8}.api-status span{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:0.5rem}.api-live{background:#22c55e}
+    .hero h1{font-size:2.5rem;margin-bottom:1rem}
+    .hero p{font-size:1.1rem;margin-bottom:2rem;opacity:0.9;max-width:500px;margin-left:auto;margin-right:auto}
+    .search-box{max-width:500px;margin:0 auto;display:flex;gap:0.5rem}
+    .search-box input{flex:1;padding:1rem 1.5rem;border:none;border-radius:12px;font-size:1rem;background:rgba(255,255,255,0.15);color:#fff}
+    .search-box input::placeholder{color:rgba(255,255,255,0.6)}
+    .search-box input:focus{outline:2px solid #f59e0b}
+    .search-box button{padding:1rem 2rem;background:linear-gradient(135deg,#f59e0b,#f97316);color:#1e293b;border:none;border-radius:12px;font-size:1rem;font-weight:700;cursor:pointer}
+
+    /* Stats */
     .stats-bar{background:#fff;padding:1.5rem 2rem;border-bottom:1px solid #e2e8f0}
     .stats-inner{max-width:1200px;margin:0 auto;display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
-    .stat-item{text-align:center}.stat-number{font-size:1.75rem;font-weight:800;color:#667eea}.stat-label{font-size:0.8rem;color:#64748b;text-transform:uppercase}
-    .deals{padding:4rem 2rem;max-width:1200px;margin:0 auto}.deals h2{font-size:1.75rem;margin-bottom:2rem;text-align:center}
-    .deals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem}
-    .deal-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:transform 0.3s}
-    .deal-card:hover{transform:translateY(-8px);box-shadow:0 12px 40px rgba(0,0,0,0.15)}.deal-card:hover img{transform:scale(1.05)}
-    .deal-card img{width:100%;height:200px;object-fit:cover;transition:transform 0.3s}
-    .deal-card-body{padding:1.25rem}.deal-card h3{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
-    .deal-card .price{font-size:1.1rem}.deal-card .price strong{color:#1e293b}.deal-card .price s{color:#999;margin-left:0.5rem}
-.deal-card .savings{color:#16a34a;font-weight:600;margin-top:0.25rem}.deal-card .retailer{color:#64748b;font-size:0.85rem;margin-top:0.25rem}
-    .deal-card-actions{display:flex;gap:0.75rem;margin-top:1rem;align-items:center}
+    .stat-item{text-align:center}
+    .stat-number{font-size:1.75rem;font-weight:800;color:#667eea}
+    .stat-label{font-size:0.8rem;color:#64748b;text-transform:uppercase}
+
+    /* Products */
+    .deals{padding:4rem 2rem;max-width:1200px;margin:0 auto}
+    .section-title{font-size:1.75rem;margin-bottom:2rem;text-align:center}
+    .deals-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem}
+    .deal-card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.06);transition:transform .3s,box-shadow .3s}
+    .deal-card:hover{transform:translateY(-8px);box-shadow:0 12px 40px rgba(0,0,0,0.15)}
+    .deal-card:hover img{transform:scale(1.05)}
+    .deal-card img{width:100%;height:200px;object-fit:cover;transition:transform .3s}
+    .card-body{padding:1.25rem}
+    .card-title{font-size:1rem;font-weight:700;margin-bottom:0.5rem}
+    .card-price{font-size:1.1rem}
+    .card-price strong{color:#1e293b}
+.card-price s{color:#999;margin-left:0.5rem}
+    .card-savings{color:#16a34a;font-weight:600;margin-top:0.25rem;font-size:0.9rem}
+    .card-retailer{color:#64748b;font-size:0.85rem;margin-top:0.25rem}
+    .card-actions{display:flex;gap:0.75rem;margin-top:1rem;align-items:center}
+    .btn-cart{padding:0.5rem 1rem;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;transition:all .2s;color:#475569}
+    .btn-cart.added{background:#dcfce7;border-color:#16a34a;color:#16a34a}
+    .btn-fav{position:absolute;top:0.5rem;right:0.5rem;background:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15);z-index:2}
     .card-badge{position:absolute;top:0.5rem;left:0.5rem;background:#fff;padding:0.25rem 0.5rem;border-radius:6px;font-size:0.75rem;font-weight:700;color:#667eea}
-    .fav-btn{position:absolute;top:0.5rem;right:0.5rem;background:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.15)}
-    .add-cart-btn{padding:0.5rem 1rem;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:8px;font-weight:600;font-size:0.85rem;cursor:pointer;transition:all 0.2s;color:#475569}.add-cart-btn.added{background:#dcfce7;border-color:#16a34a;color:#16a34a}
-    .categories{padding:4rem 2rem;max-width:1200px;margin:0 auto;text-align:center}.categories h2{font-size:1.75rem;margin-bottom:2rem}
-    .categories ul{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem}
-    .categories li a{display:inline-block;padding:0.75rem 1.5rem;background:#fff;border:2px solid #e2e8f0;border-radius:50px;font-weight:600;color:#475569;transition:all 0.3s}
+
+    /* Categories */
+    .categories{padding:4rem 2rem;max-width:1200px;margin:0 auto;text-align:center}
+    .categories ul{list-style:none;display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem;margin-top:1rem}
+    .categories li a{display:inline-block;padding:0.75rem 1.5rem;background:#fff;border:2px solid #e2e8f0;border-radius:50px;font-weight:600;color:#475569;transition:all .3s}
     .categories li a:hover,.categories li a.active{border-color:#667eea;color:#667eea;transform:translateY(-2px)}
-    .page{padding:4rem 2rem;max-width:800px;margin:0 auto}.page h1{font-size:2rem;margin-bottom:1.5rem}
-    .page p{color:#64748b;margin-bottom:1.5rem;line-height:1.8}
-    .tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-top:2rem}
-    .tech-item{background:#fff;padding:1.5rem;border-radius:12px;text-align:center;font-weight:600;color:#667eea;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-    .skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
-    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}.skeleton-card{height:320px}
-    .footer{background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;padding:3rem 2rem;text-align:center;margin-top:4rem}.footer p{opacity:0.6;font-size:0.875rem}
+
+    /* Cart Drawer */
+    .cart-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:199;display:none}
+    .cart-drawer{position:fixed;top:0;right:0;width:350px;max-width:90vw;height:100vh;background:#fff;box-shadow:-4px 0 30px rgba(0,0,0,0.15);z-index:200;padding:2rem;overflow-y:auto;transform:translateX(100%);transition:transform .3s}
+    .cart-drawer.open{transform:translateX(0)}
+    .cart-overlay.open{display:block}
+    .cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+    .cart-close{background:none;border:none;font-size:1.5rem;cursor:pointer}
+    .cart-item{display:flex;gap:1rem;padding:1rem 0;border-bottom:1px solid #e2e8f0;align-items:center}
+    .cart-item img{width:60px;height:60px;object-fit:cover;border-radius:8px}
+    .cart-item-info{flex:1}
+    .cart-item-title{font-weight:600;font-size:0.9rem}
+    .cart-item-price{color:#16a34a;font-weight:700}
+    .cart-empty{text-align:center;padding:3rem 1rem;color:#64748b}
+    .cart-total{font-size:1.25rem;font-weight:700;margin-top:1.5rem;padding-top:1rem;border-top:2px solid #e2e8f0}
+    .btn-clear{padding:0.25rem 0.75rem;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:0.8rem;float:right}
+
+    /* Footer */
+    .footer{background:linear-gradient(135deg,#1e293b,#0f172a);color:#fff;padding:3rem 2rem;text-align:center;margin-top:4rem}
+    .footer p{opacity:0.6;font-size:0.875rem}
+
+    /* Loading & Error */
     .loading{text-align:center;padding:3rem;color:#666}
-    @media(min-width:768px){.hero form{flex-direction:row}.hero input{flex:1;width:auto}.hero button{width:auto}}
+    .error-msg{text-align:center;padding:3rem;color:#dc2626}
+
+    /* Responsive */
+    @media(max-width:768px){
+      .hero h1{font-size:1.75rem}
+      .hero p{font-size:1rem}
+      .deals-grid{grid-template-columns:1fr}
+      .header nav{gap:1rem}
+      .nav-links{gap:1rem}
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-    const API_BASE = 'https://fakestoreapi.com';
 
-    function App() {
-      const [page, setPage] = useState('home');
-      const [term, setTerm] = useState('');
-      const [selCategory, setSelCategory] = useState('');
-      const [favorites, setFavorites] = useState(function(){ try { return JSON.parse(localStorage.getItem('favs')) || []; } catch(e) { return []; } });
-      const [cart, setCart] = useState(function(){ try { return JSON.parse(localStorage.getItem('cart')) || []; } catch(e) { return []; } });
-      const [data, setData] = useState(null);
-      const [loading, setLoading] = useState(true);
-      const [error, setError] = useState(null);
-      const [toast, setToast] = useState(null);
-      const [cartOpen, setCartOpen] = useState(false);
+  <!-- Header -->
+  <header class="header">
+    <nav>
+      <div class="logo">DealBuddy</div>
+      <div class="nav-links">
+        <a href="#" class="active" data-page="home">Deals</a>
+        <a href="#" data-page="categories">Categories</a>
+      </div>
+      <div class="header-right">
+        <span class="badge" id="favBadge">❤️ 0</span>
+        <span class="badge cart-badge" id="cartBadge">🛒 0</span>
+      </div>
+    </nav>
+  </header>
 
-      useEffect(function(){ document.title = 'DealBuddy'; }, []);
+  <!-- Main Content -->
+  <main id="mainContent"></main>
 
-      useEffect(function(){
-        fetch(API_BASE + '/products')
-          .then(function(r){ return r.json(); })
-          .then(function(d){ setData(d); setLoading(false); })
-          .catch(function(e){ setError(e.message); setLoading(false); });
-      }, []);
+  <!-- Cart Drawer -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-header">
+      <h3>🛒 Your Cart</h3>
+<button class="cart-close" id="cartClose">✕</button>
+    </div>
+    <div id="cartItems"></div>
+    <div class="cart-total" id="cartTotal"></div>
+  </div>
 
-      useEffect(function(){ localStorage.setItem('favs', JSON.stringify(favorites)); }, [favorites]);
-      useEffect(function(){ localStorage.setItem('cart', JSON.stringify(cart)); }, [cart]);
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2026 Owolabi Onaope Christopher. All rights reserved.</p>
+  </footer>
 
-      function showToast(msg){ setToast(msg); setTimeout(function(){ setToast(null); }, 3000); }
+  <script>
+    // ===== APP STATE =====
+    const API = 'https://fakestoreapi.com';
+    let allProducts = [];
+    let favorites = JSON.parse(localStorage.getItem('db_favs')) || [];
+    let cart = JSON.parse(localStorage.getItem('db_cart')) || [];
+    let currentCategory = '';
+    let searchTerm = '';
 
-      function toggleFav(id){
-        setFavorites(function(f){
-return f.includes(id) ? f.filter(function(x){ return x !== id; }) : f.concat([id]);
-        });
-        showToast(favorites.includes(id) ? '💔 Removed' : '❤️ Added!');
+    // ===== FETCH PRODUCTS =====
+    async function loadProducts() {
+      const main = document.getElementById('mainContent');
+      main.innerHTML = '<div class="loading">🔄 Loading deals...</div>';
+      try {
+        const res = await fetch(API + '/products');
+        allProducts = await res.json();
+        renderHome();
+      } catch (e) {
+        main.innerHTML = '<div class="error-msg"><h2>❌ Error loading products</h2><p>' + e.message + '</p></div>';
       }
-
-      function addToCart(item){
-        if (cart.find(function(i){ return i.id === item.id; })) { showToast('Already in cart!'); return; }
-        setCart(function(c){ return c.concat([item]); });
-        showToast('🛒 ' + item.title + ' added!');
-      }
-
-      function removeFromCart(id){ setCart(function(c){ return c.filter(function(i){ return i.id !== id; }); }); showToast('Removed'); }
-      function clearCart(){ setCart([]); showToast('Cart cleared'); }
-
-      var deals = useMemo(function(){
-        if (!data) return [];
-        return data.map(function(p){
-          return { id: p.id, title: p.title, price: p.price, originalPrice: (p.price * 1.3).toFixed(2), savings: (p.price * 0.3).toFixed(2), retailer: 'Fake Store API', category: p.category, image: p.image, rating: p.rating };
-        });
-      }, [data]);
-
-      var filtered = useMemo(function(){
-        var result = deals;
-        if (selCategory) result = result.filter(function(d){ return d.category === selCategory; });
-        if (term) { var t = term.toLowerCase(); result = result.filter(function(d){ return d.title.toLowerCase().indexOf(t) !== -1 || d.category.toLowerCase().indexOf(t) !== -1; }); }
-        return result;
-      }, [deals, selCategory, term]);
-
-      var categories = useMemo(function(){ return Array.from(new Set(deals.map(function(d){ return d.category; }))); }, [deals]);
-      var cartTotal = cart.reduce(function(s, i){ return s + i.price; }, 0).toFixed(2);
-      var avgPrice = deals.length ? (deals.reduce(function(s, d){ return s + d.price; }, 0) / deals.length).toFixed(0) : 0;
-
-      function NavLink(props) {
-        return React.createElement('a', {
-          style: { color: page === props.to ? '#fff' : '#e2e8f0', fontWeight: page === props.to ? 700 : 500 },
-          onClick: function(e){ e.preventDefault(); setPage(props.to); window.scrollTo(0, 0); }
-        }, props.children);
-      }
-
-      function DealCard(props) {
-        var deal = props.deal;
-        var isFav = favorites.includes(deal.id);
-        var inCart = cart.find(function(i){ return i.id === deal.id; });
-        return React.createElement('article', { className: 'deal-card' },
-          React.createElement('div', { style: { position: 'relative' } },
-            React.createElement('img', { src: deal.image, alt: deal.title, loading: 'lazy' }),
-            React.createElement('span', { className: 'card-badge' }, deal.category),
-            React.createElement('button', { className: 'fav-btn', onClick: function(){ toggleFav(deal.id); } }, isFav ? '❤️' : '🤍')
-          ),
-          React.createElement('div', { className: 'deal-card-body' },
-            React.createElement('h3', null, deal.title),
-            React.createElement('p', { className: 'price' }, React.createElement('strong', null, '$' + deal.price.toFixed(2)), React.createElement('s', null, '$' + deal.originalPrice)),
-            React.createElement('p', { className: 'savings' }, 'Save $' + deal.savings + ' at ' + deal.retailer),
-            React.createElement('div', { className: 'deal-card-actions' },
-              React.createElement('a', { onClick: function(e){ e.preventDefault(); setPage('deal-' + deal.id); window.scrollTo(0, 0); }, style: { cursor: 'pointer', fontWeight: 600, color: '#667eea', fontSize: '0.9rem' } }, 'View Deal →'),
-              React.createElement('button', { className: 'add-cart-btn' + (inCart ? ' added' : ''), onClick: function(){ addToCart(deal); }, disabled: !!inCart }, inCart ? '✓ Added' : '+ Cart')
-            )
-          )
-        );
-      }
-
-      function Skeleton(){ return React.createElement('div', { className: 'deal-card' }, React.createElement('div', { className: 'skeleton skeleton-card' })); }
-
-      function HomePage() {
-        return React.createElement(React.Fragment, null,
-          React.createElement('section', { className: 'hero' },
-React.createElement('h1', null, 'Find the Best Deals Near You'),
-            React.createElement('p', null, 'Live products from Fake Store API!'),
-            React.createElement('form', { onSubmit: function(e){ e.preventDefault(); } },
-              React.createElement('input', { type: 'search', value: term, onChange: function(e){ setTerm(e.target.value); }, placeholder: 'Search products...' }),
-              React.createElement('button', { type: 'submit' }, 'Search')
-            ),
-            React.createElement('p', { className: 'api-status' }, React.createElement('span', { className: 'api-live' }), deals.length + ' products loaded')
-          ),
-          React.createElement('section', { className: 'stats-bar' },
-            React.createElement('div', { className: 'stats-inner' },
-              React.createElement('div', { className: 'stat-item' }, React.createElement('div', { className: 'stat-number' }, deals.length), React.createElement('div', { className: 'stat-label' }, 'Products')),
-              React.createElement('div', { className: 'stat-item' }, React.createElement('div', { className: 'stat-number' }, deals.filter(function(d){ return d.price < 50; }).length), React.createElement('div', { className: 'stat-label' }, 'Under $50')),
-              React.createElement('div', { className: 'stat-item' }, React.createElement('div', { className: 'stat-number' }, categories.length), React.createElement('div', { className: 'stat-label' }, 'Categories')),
-              React.createElement('div', { className: 'stat-item' }, React.createElement('div', { className: 'stat-number' }, '$' + avgPrice), React.createElement('div', { className: 'stat-label' }, 'Avg Price'))
-            )
-          ),
-          React.createElement('section', { className: 'deals', id: 'deals' },
-            React.createElement('h2', null, 'Featured Deals (' + filtered.length + ')'),
-            loading ? React.createElement('div', { className: 'deals-grid' }, [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map(function(i){ return React.createElement(Skeleton, { key: i }); }))
-            : error ? React.createElement('div', { style: { textAlign: 'center', padding: '3rem', color: '#dc2626' } }, React.createElement('h2', null, '❌ Error'), React.createElement('p', null, error), React.createElement('button', { onClick: function(){ window.location.reload(); }, style: { marginTop: '1rem', padding: '0.75rem 1.5rem', background: '#667eea', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer' } }, 'Retry'))
-            : React.createElement('div', { className: 'deals-grid' }, filtered.map(function(d){ return React.createElement(DealCard, { key: d.id, deal: d }); }))
-          ),
-          React.createElement('section', { className: 'categories', id: 'categories' },
-            React.createElement('h2', null, 'Browse by Category'),
-            React.createElement('ul', null,
-              React.createElement('li', null, React.createElement('a', { className: !selCategory ? 'active' : '', onClick: function(){ setSelCategory(''); } }, 'All')),
-              categories.map(function(c){ return React.createElement('li', { key: c }, React.createElement('a', { className: selCategory === c ? 'active' : '', onClick: function(){ setSelCategory(c); } }, c)); })
-            )
-          )
-        );
-      }
-
-      function DealPage(props) {
-        var id = props.id;
-        var [product, setProduct] = useState(null);
-        var [pl, setPl] = useState(true);
-        useEffect(function(){
-          fetch(API_BASE + '/products/' + id).then(function(r){ return r.json(); }).then(function(d){ setProduct(d); setPl(false); }).catch(function(){ setPl(false); });
-        }, [id]);
-        if (pl) return React.createElement('div', { className: 'loading' }, '🔄 Loading...');
-        if (!product) return React.createElement('div', { className: 'page' }, React.createElement('h1', null, '404'), React.createElement('p', null, 'Product not found.'));
-        var isFav = favorites.includes(product.id);
-var inCart = cart.find(function(i){ return i.id === product.id; });
-        var deal = { id: product.id, title: product.title, price: product.price, originalPrice: (product.price * 1.3).toFixed(2), savings: (product.price * 0.3).toFixed(2), retailer: 'Fake Store API', category: product.category, image: product.image, rating: product.rating };
-        return React.createElement('section', { className: 'page', style: { maxWidth: '600px' } },
-          React.createElement('img', { src: product.image, alt: product.title, style: { width: '100%', height: '300px', objectFit: 'contain', background: '#fff', padding: '1rem', marginBottom: '2rem', borderRadius: '8px' } }),
-          React.createElement('h1', null, product.title),
-          React.createElement('p', { style: { fontSize: '0.85rem', color: '#64748b', textTransform: 'capitalize' } }, product.category),
-          React.createElement('p', { style: { fontSize: '1.5rem', color: '#16a34a', fontWeight: 700, marginTop: '1rem' } }, '$' + product.price.toFixed(2)),
-          React.createElement('p', { style: { marginTop: '1rem', color: '#64748b' } }, product.description || 'No description available.'),
-          React.createElement('p', { style: { marginTop: '1rem' } }, '⭐️ ' + (product.rating ? product.rating.rate : 'N/A') + ' (' + (product.rating ? product.rating.count : 0) + ' reviews)'),
-          React.createElement('div', { style: { marginTop: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' } },
-            React.createElement('button', { className: 'add-cart-btn', onClick: function(){ toggleFav(product.id); }, style: { padding: '0.75rem 1.5rem' } }, isFav ? '❤️ Saved' : '🤍 Save'),
-            React.createElement('button', { className: 'add-cart-btn' + (inCart ? ' added' : ''), onClick: function(){ addToCart(deal); }, disabled: !!inCart, style: { padding: '0.75rem 1.5rem' } }, inCart ? '✓ In Cart' : '+ Add to Cart'),
-            React.createElement('button', { onClick: function(){ setPage('home'); }, style: { padding: '0.75rem 1.5rem', background: '#f1f5f9', border: '2px solid #e2e8f0', borderRadius: '10px', fontWeight: 600, cursor: 'pointer' } }, '← Back')
-          )
-        );
-      }
-
-      function AboutPage() {
-        return React.createElement('section', { className: 'page' },
-          React.createElement('h1', null, 'About DealBuddy'),
-          React.createElement('p', null, 'DealBuddy is a full-stack deal-discovery platform built with React, modern JavaScript, and responsive design.'),
-          React.createElement('p', null, 'Built by ', React.createElement('strong', null, 'Christopher Owolabi'), ' as part of a 30-day full-stack web development learning path.'),
-          React.createElement('h2', { style: { marginTop: '2rem', marginBottom: '1rem', color: '#1e293b' } }, 'Tech Stack'),
-          React.createElement('div', { className: 'tech-grid' },
-            React.createElement('div', { className: 'tech-item' }, '⚛️ React'),
-            React.createElement('div', { className: 'tech-item' }, '🖥️ Node.js'),
-            React.createElement('div', { className: 'tech-item' }, '🚂 Express'),
-            React.createElement('div', { className: 'tech-item' }, '🔐 JWT Auth'),
-            React.createElement('div', { className: 'tech-item' }, '🔗 Context API'),
-            React.createElement('div', { className: 'tech-item' }, '🌍 Fetch API'),
-            React.createElement('div', { className: 'tech-item' }, '💾 LocalStorage'),
-            React.createElement('div', { className: 'tech-item' }, '🚀 GitHub Pages')
-          )
-        );
-      }
-
-      function ContactPage() {
-        var [form, setForm] = useState({ name: '', email: '', message: '' });
-        var [sent, setSent] = useState(false);
-        return React.createElement('section', { className: 'page' },
-          React.createElement('h1', null, 'Get In Touch'),
-          React.createElement('p', null, 'Have a question or want to collaborate? Drop me a message!'),
-sent ? React.createElement('div', { style: { background: '#dcfce7', color: '#166534', padding: '1.5rem', borderRadius: '12px', marginTop: '1rem' } }, '✅ Message sent!') : null,
-          !sent ? React.createElement('form', { onSubmit: function(e){ e.preventDefault(); setSent(true); setForm({ name: '', email: '', message: '' }); }, style: { display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '500px', marginTop: '1rem' } },
-            React.createElement('label', { style: { fontWeight: 600 } }, 'Name'),
-            React.createElement('input', { type: 'text', value: form.name, onChange: function(e){ setForm(function(p){ return Object.assign({}, p, { name: e.target.value }); }); }, required: true, style: { padding: '0.875rem 1.25rem', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '1rem' } }),
-            React.createElement('label', { style: { fontWeight: 600 } }, 'Email'),
-            React.createElement('input', { type: 'email', value: form.email, onChange: function(e){ setForm(function(p){ return Object.assign({}, p, { email: e.target.value }); }); }, required: true, style: { padding: '0.875rem 1.25rem', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '1rem' } }),
-            React.createElement('label', { style: { fontWeight: 600 } }, 'Message'),
-            React.createElement('textarea', { value: form.message, onChange: function(e){ setForm(function(p){ return Object.assign({}, p, { message: e.target.value }); }); }, rows: '5', required: true, style: { padding: '0.875rem 1.25rem', border: '2px solid #e2e8f0', borderRadius: '10px', fontSize: '1rem' } }),
-            React.createElement('button', { type: 'submit', style: { padding: '1rem 2rem', background: 'linear-gradient(135deg,#667eea,#764ba2)', color: '#fff', border: 'none', borderRadius: '12px', fontSize: '1rem', fontWeight: 700, cursor: 'pointer' } }, 'Send →')
-          ) : null
-        );
-      }
-
-      function CartDrawer() {
-        if (!cartOpen) return null;
-        return React.createElement(React.Fragment, null,
-          React.createElement('div', { className: 'cart-overlay', onClick: function(){ setCartOpen(false); } }),
-          React.createElement('div', { className: 'cart-drawer' },
-            React.createElement('div', { className: 'cart-header' },
-              React.createElement('h3', null, '🛒 Cart (' + cart.length + ')'),
-              React.createElement('button', { className: 'cart-close', onClick: function(){ setCartOpen(false); } }, '✕')
-            ),
-            cart.length === 0 ? React.createElement('div', { className: 'cart-empty' }, 'Your cart is empty') : null,
-            cart.map(function(i){
-              return React.createElement('div', { key: i.id, className: 'cart-item' },
-                React.createElement('img', { src: i.image, alt: i.title }),
-                React.createElement('div', { className: 'cart-item-info' },
-                  React.createElement('div', { className: 'cart-item-title' }, i.title),
-                  React.createElement('div', { className: 'cart-item-price' }, '$' + i.price.toFixed(2))
-                ),
-                React.createElement('button', { onClick: function(){ removeFromCart(i.id); }, style: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.25rem' } }, '✕')
-              );
-            }),
-            React.createElement('div', { className: 'cart-total' },
-              'Total: $' + cartTotal,
-              React.createElement('button', { onClick: clearCart, style: { float: 'right', padding: '0.25rem 0.75rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' } }, 'Clear')
-            )
-          )
-        );
-      }
-
-      var dealMatch = page.match(/^deal-(\d+)$/);
-      var dealId = dealMatch ? parseInt(dealMatch[1]) : null;
-
-      return React.createElement(React.Fragment, null,
-        React.createElement('header', { className: 'header' },
-          React.createElement('nav', null,
-React.createElement('a', { className: 'logo', onClick: function(){ setPage('home'); }, style: { cursor: 'pointer' } }, 'DealBuddy'),
-            React.createElement(NavLink, { to: 'home' }, 'Deals'),
-            React.createElement(NavLink, { to: 'categories' }, 'Categories'),
-            React.createElement(NavLink, { to: 'about' }, 'About'),
-            React.createElement(NavLink, { to: 'contact' }, 'Contact'),
-            React.createElement('div', { className: 'header-right' },
-              favorites.length > 0 ? React.createElement('span', { className: 'badge-count fav-badge' }, '❤️ ' + favorites.length) : null,
-              React.createElement('span', { className: 'badge-count cart-badge', onClick: function(){ setCartOpen(true); } }, '🛒 ' + cart.length)
-            )
-          )
-        ),
-        React.createElement('main', null,
-          page === 'home' ? React.createElement(HomePage) : null,
-          page === 'categories' ? React.createElement(HomePage) : null,
-          page === 'about' ? React.createElement(AboutPage) : null,
-          page === 'contact' ? React.createElement(ContactPage) : null,
-          dealId ? React.createElement(DealPage, { id: dealId }) : null
-        ),
-        React.createElement('footer', { className: 'footer' }, React.createElement('p', null, '© 2026 Owolabi Onaope Christopher')),
-        toast ? React.createElement('div', { className: 'toast' }, toast) : null,
-        React.createElement(CartDrawer)
-      );
     }
 
-    var root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
+    // ===== RENDER HOME =====
+    function renderHome() {
+      const main = document.getElementById('mainContent');
+      const filtered = getFiltered();
+      const categories = [...new Set(allProducts.map(p => p.category))];
+      const avgPrice = allProducts.length ? Math.round(allProducts.reduce((s, p) => s + p.price, 0) / allProducts.length) : 0;
+      const under50 = allProducts.filter(p => p.price < 50).length;
+
+      let html = `
+        <section class="hero">
+          <h1>Find the Best Deals Near You</h1>
+          <p>Save money on electronics, fashion, home essentials, AI tools, groceries and more.</p>
+          <div class="search-box">
+            <input type="search" id="searchInput" placeholder="Search products..." value="${searchTerm}">
+            <button id="searchBtn">Search</button>
+          </div>
+        </section>
+        <section class="stats-bar">
+          <div class="stats-inner">
+            <div class="stat-item"><div class="stat-number">${allProducts.length}</div><div class="stat-label">Products</div></div>
+            <div class="stat-item"><div class="stat-number">${under50}</div><div class="stat-label">Under $50</div></div>
+            <div class="stat-item"><div class="stat-number">${categories.length}</div><div class="stat-label">Categories</div></div>
+            <div class="stat-item"><div class="stat-number">$${avgPrice}</div><div class="stat-label">Avg Price</div></div>
+          </div>
+        </section>
+        <section class="deals">
+          <h2 class="section-title">Featured Deals (${filtered.length})</h2>
+          <div class="deals-grid">
+            ${filtered.map(p => createDealCard(p)).join('')}
+          </div>
+        </section>
+        <section class="categories">
+          <h2 class="section-title">Browse by Category</h2>
+          <ul>
+            <li><a href="#" class="${!currentCategory ? 'active' : ''}" data-category="">All</a></li>
+            ${categories.map(c => `<li><a href="#" class="${currentCategory === c ? 'active' : ''}" data-category="${c}">${c}</a></li>`).join('')}
+          </ul>
+        </section>
+      `;
+      main.innerHTML = html;
+      bindEvents();
+    }
+
+    // ===== CREATE DEAL CARD =====
+    function createDealCard(p) {
+      const isFav = favorites.includes(p.id);
+      const inCart = cart.find(i => i.id === p.id);
+      const originalPrice = (p.price * 1.3).toFixed(2);
+      const savings = (p.price * 0.3).toFixed(2);
+      return `
+        <article class="deal-card">
+          <div style="position:relative">
+            <img src="${p.image}" alt="${p.title}" loading="lazy">
+            <span class="card-badge">${p.category}</span>
+            <button class="btn-fav" data-id="${p.id}">${isFav ? '❤️' : '🤍'}</button>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">${p.title}</h3>
+            <p class="card-price"><strong>$${p.price.toFixed(2)}</strong> <s>$${originalPrice}</s></p>
+<p class="card-savings">Save $${savings} at ${p.rating.rate} ⭐️</p>
+            <div class="card-actions">
+              <button class="btn-cart ${inCart ? 'added' : ''}" data-id="${p.id}">${inCart ? '✓ In Cart' : '+ Add to Cart'}</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    // ===== FILTER PRODUCTS =====
+    function getFiltered() {
+      let result = allProducts;
+      if (currentCategory) result = result.filter(p => p.category === currentCategory);
+      if (searchTerm) {
+        const t = searchTerm.toLowerCase();
+        result = result.filter(p => p.title.toLowerCase().includes(t) || p.category.toLowerCase().includes(t));
+      }
+      return result;
+    }
+
+    // ===== EVENT BINDING =====
+    function bindEvents() {
+      // Search
+      document.getElementById('searchBtn').onclick = function() {
+        searchTerm = document.getElementById('searchInput').value;
+        renderHome();
+      };
+      document.getElementById('searchInput').onkeypress = function(e) {
+        if (e.key === 'Enter') {
+          searchTerm = this.value;
+          renderHome();
+        }
+      };
+
+      // Category filters
+      document.querySelectorAll('[data-category]').forEach(function(a) {
+        a.onclick = function(e) {
+          e.preventDefault();
+          currentCategory = this.dataset.category;
+          renderHome();
+        };
+      });
+
+      // Favorite buttons
+      document.querySelectorAll('.btn-fav').forEach(function(btn) {
+        btn.onclick = function() {
+          const id = parseInt(this.dataset.id);
+          if (favorites.includes(id)) {
+            favorites = favorites.filter(x => x !== id);
+          } else {
+            favorites.push(id);
+          }
+          localStorage.setItem('db_favs', JSON.stringify(favorites));
+          updateBadges();
+          renderHome();
+        };
+      });
+
+      // Cart buttons
+      document.querySelectorAll('.btn-cart').forEach(function(btn) {
+        btn.onclick = function() {
+          const id = parseInt(this.dataset.id);
+          const product = allProducts.find(p => p.id === id);
+          if (cart.find(i => i.id === id)) {
+            cart = cart.filter(i => i.id !== id);
+          } else {
+            cart.push(product);
+          }
+          localStorage.setItem('db_cart', JSON.stringify(cart));
+          updateBadges();
+          renderHome();
+        };
+      });
+
+      // Cart toggle
+      document.getElementById('cartBadge').onclick = function() {
+        document.getElementById('cartDrawer').classList.add('open');
+        document.getElementById('cartOverlay').classList.add('open');
+        renderCart();
+      };
+      document.getElementById('cartClose').onclick = closeCart;
+      document.getElementById('cartOverlay').onclick = closeCart;
+    }
+
+    // ===== CART =====
+    function closeCart() {
+      document.getElementById('cartDrawer').classList.remove('open');
+      document.getElementById('cartOverlay').classList.remove('open');
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItems');
+      const totalEl = document.getElementById('cartTotal');
+      if (cart.length === 0) {
+        container.innerHTML = '<div class="cart-empty">Your cart is empty</div>';
+        totalEl.innerHTML = '';
+        return;
+      }
+      container.innerHTML = cart.map(i => `
+        <div class="cart-item">
+          <img src="${i.image}" alt="${i.title}">
+          <div class="cart-item-info">
+            <div class="cart-item-title">${i.title}</div>
+            <div class="cart-item-price">$${i.price.toFixed(2)}</div>
+          </div>
+          <button onclick="removeFromCart(${i.id})" style="background:none;border:none;cursor:pointer;font-size:1.25rem">✕</button>
+        </div>
+      `).join('');
+      const total = cart.reduce((s, i) => s + i.price, 0).toFixed(2);
+      totalEl.innerHTML = `Total: $${total} <button class="btn-clear" onclick="clearCart()">Clear</button>`;
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+localStorage.setItem('db_cart', JSON.stringify(cart));
+      updateBadges();
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      localStorage.setItem('db_cart', JSON.stringify(cart));
+      updateBadges();
+      renderCart();
+    }
+
+    // ===== UPDATE BADGES =====
+    function updateBadges() {
+      document.getElementById('favBadge').textContent = '❤️ ' + favorites.length;
+      document.getElementById('cartBadge').textContent = '🛒 ' + cart.length;
+    }
+
+    // ===== NAV LINKS =====
+    document.querySelectorAll('.nav-links a').forEach(function(a) {
+      a.onclick = function(e) {
+        e.preventDefault();
+        document.querySelectorAll('.nav-links a').forEach(x => x.classList.remove('active'));
+        this.classList.add('active');
+        const page = this.dataset.page;
+        if (page === 'categories') {
+          document.querySelector('.categories').scrollIntoView({behavior: 'smooth'});
+        } else {
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+      };
+    });
+
+    // ===== INIT =====
+    updateBadges();
+    loadProducts();
   </script>
 </body>
 </html>
