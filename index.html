@@ -137,7 +137,7 @@
 
   <script>
     // ===== APP STATE =====
-    const API = 'https://dealbuddy-api.onrender.com';
+    const API = 'https://dealbuddy-api.onrender.com/api';
     let allProducts = [];
     let favorites = JSON.parse(localStorage.getItem('db_favs')) || [];
     let cart = JSON.parse(localStorage.getItem('db_cart')) || [];
@@ -149,7 +149,7 @@
       const main = document.getElementById('mainContent');
       main.innerHTML = '<div class="loading">🔄 Loading deals...</div>';
       try {
-        const res = await fetch(API + '/products');
+        const res = await fetch(API + '/api/products');
         allProducts = await res.json();
         renderHome();
       } catch (e) {
